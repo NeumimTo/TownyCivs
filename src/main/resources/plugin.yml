@@ -1,0 +1,6 @@
+name: TownyColonies
+version: '${version}'
+main: cz.neumimto.towny.townycolonies.TownyColonies
+api-version: 1.18
+depend: [ Towny ]
+authors: [ NeumimTo ]
