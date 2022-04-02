@@ -20,13 +20,28 @@ repositories {
         name = 'glaremasters repo'
         url = 'https://repo.glaremasters.me/repository/towny/'
     }
+    maven {
+        url = "https://repo.aikar.co/content/groups/aikar/"
+    }
+    maven {
+        url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+    }
+}
+
+compileJava {
+    options.compilerArgs += ["-parameters"]
+    options.fork = true
+    options.forkOptions.executable = 'javac'
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.18.1-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
     compileOnly 'com.palmergames.bukkit.towny:towny:0.98.1.0'
     implementation 'com.electronwill.night-config:hocon:3.6.5'
     implementation 'com.google.inject:guice:5.1.0'
+    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.5'
+    implementation "co.aikar:acf-paper:0.5.1-SNAPSHOT"
+    implementation 'net.kyori:adventure-text-minimessage:4.10.1'
 }
 
 def targetJavaVersion = 17
@@ -56,6 +71,9 @@ processResources {
 
 shadowJar {
     relocate 'com.electronwill', 'townycolonies.com.electronwill'
-    relocate 'com.typesafe', 'townycolonies.com.typesafe'
-
+    relocate 'com.typesafe', 'com.typesafe'
+    relocate 'com.github.stefvanschie', 'townycolonies.com.github.stefvanschie'
+    relocate 'com.google.inject', 'townycolonies.com.google.inject'
+    relocate 'co.aikar.commands', 'townycolonies.acf'
+    relocate 'co.aikar.locales', 'townycolonies.locales'
 }
