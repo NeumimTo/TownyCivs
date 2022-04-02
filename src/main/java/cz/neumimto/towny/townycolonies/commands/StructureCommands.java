@@ -6,6 +6,8 @@ import co.aikar.commands.annotation.*;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Translatable;
+import cz.neumimto.towny.townycolonies.StructureService;
+import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
 import cz.neumimto.towny.townycolonies.gui.MainMenuGui;
 import cz.neumimto.towny.townycolonies.gui.StructureGui;
 import cz.neumimto.towny.townycolonies.gui.StructuresGui;
@@ -25,6 +27,15 @@ public class StructureCommands extends BaseCommand {
     @Inject
     private StructureGui structureGui;
 
+    @Inject
+    private MainMenuGui mainMenuGui;
+
+    @Inject
+    private StructureService structureService;
+
+    @Inject
+    private BlueprintsGui blueprintsGui;
+
     @Default
     @CommandPermission("townycolonies.commands.common.mainmenu")
     public void mainMenuCommand(Player player) {
@@ -33,7 +44,7 @@ public class StructureCommands extends BaseCommand {
             player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
             return;
         }
-        MainMenuGui.display(player);
+        mainMenuGui.display(player);
     }
 
     @Subcommand("structures|ss")
@@ -58,14 +69,15 @@ public class StructureCommands extends BaseCommand {
         structureGui.display(player, structureId);
     }
 
-    @Subcommand("architect place|ap")
-    @CommandPermission("townycolonies.commands.architect.place")
-    public void placeStructure(Player player, String structureId) {
+    @Subcommand("blueprints|bp")
+    @CommandPermission("townycolonies.commands.common.mainmenu")
+    public void placeStructure(Player player) {
         Resident resident = TownyAPI.getInstance().getResident(player);
         if (resident == null || !resident.hasTown()) {
             player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
             return;
         }
+        blueprintsGui.display(player);
     }
 
     @Subcommand("buy|b")
@@ -76,6 +88,17 @@ public class StructureCommands extends BaseCommand {
             player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
             return;
         }
+        structureService.buyBlueprint(player, structureId);
+    }
 
+    @Subcommand("place|p")
+    @CommandPermission("townycolonies.commands.architect.place")
+    public void place(Player player, String structureId) {
+        Resident resident = TownyAPI.getInstance().getResident(player);
+        if (resident == null || !resident.hasTown()) {
+            player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
+            return;
+        }
+        structureService.placeBlueprint(player, structureId);
     }
 }

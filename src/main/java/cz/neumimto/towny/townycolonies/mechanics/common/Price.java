@@ -19,7 +19,7 @@ public class Price implements RequirementMechanic<DoubleWrapper> {
 
     @Override
     public void nokmessage(TownContext townContext, DoubleWrapper configuration) {
-        townContext.player.sendMessage("Not enough funds in town bank - " + configuration);
+        townContext.player.sendMessage("Not enough funds in town bank - " + configuration.value);
     }
 
     @Override

@@ -2,12 +2,12 @@ package cz.neumimto.towny.townycolonies;
 
 import com.google.gson.*;
 import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
+import it.unimi.dsi.fastutil.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
 
@@ -69,6 +69,12 @@ public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
 
     public static class Data {
         public List<LoadedStructure> structures;
+        public Map<String, Integer> blueprints;
+
+        public Data() {
+            this.structures = new ArrayList<>();
+            this.blueprints = new HashMap<>();
+        }
     }
 
     public static class LoadedStructure {

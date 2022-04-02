@@ -53,18 +53,20 @@ public class Structure {
     public Map<String, Integer> blocks;
 
     public static class Area {
-        int x;
-        int y;
+        public final int x;
+        public final int z;
+        public final int y;
 
-        public Area(int x, int y) {
+        public Area(int x,int z, int y) {
             this.x = x;
+            this.z = z;
             this.y = y;
         }
     }
 
     public static class LoadedPair<M,C> {
-        C configValue;
-        M mechanic;
+        public final C configValue;
+        public final M mechanic;
 
         public LoadedPair(C configValue, M mechanic) {
             this.configValue = configValue;
@@ -93,7 +95,9 @@ public class Structure {
         @Override
         public List convertToField(List<Config> value) {
             List mechs = new ArrayList();
-
+            if (value == null) {
+                return mechs;
+            }
             var registry = TownyColonies.injector.getInstance(MechanicService.class);
 
             for (Config config : value) {
@@ -103,7 +107,7 @@ public class Structure {
                     RequirementMechanic m = requirementMechanic.get();
                     Object aNew = m.getNew();
                     new ObjectConverter().toObject(config,aNew);
-                    mechs.add(new LoadedPair<>(aNew, mechanic));
+                    mechs.add(new LoadedPair<>(aNew, m));
                 }
             }
 
@@ -120,7 +124,7 @@ public class Structure {
         @Override
         public Area convertToField(String value) {
             String[] a = value.split("x");
-            return new Area(Integer.parseInt(a[0]), Integer.parseInt(a[1]));
+            return new Area(Integer.parseInt(a[0]), Integer.parseInt(a[1]), Integer.parseInt(a[2]));
         }
 
         @Override
@@ -146,3 +150,4 @@ public class Structure {
         }
     }
 }
+
