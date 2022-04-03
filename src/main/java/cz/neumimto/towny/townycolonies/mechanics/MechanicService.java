@@ -28,7 +28,7 @@ public class MechanicService {
     public void registerDefaults() {
         buyReq("permission", new Permission());
         buyReq("price", new Price());
-        buyReq("town_upkeep", new Price());
+        prodReq("town_upkeep", new Price());
 
         Bukkit.getPluginManager().callEvent(new RegisterMechanicEvent(this));;
     }

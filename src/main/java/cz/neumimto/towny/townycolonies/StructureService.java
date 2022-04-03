@@ -148,7 +148,6 @@ public class StructureService {
             town.addMetaData(structureMetadata, false);
         }
         structureMetadata.getValue().blueprints.merge(structure.id, 1, Integer::sum);
-        TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " bought " + structure.name);
 
         for (Structure.LoadedPair<RequirementMechanic<?>, ?> requirement : structure.buyRequirements) {
             Object configValue = requirement.configValue;
