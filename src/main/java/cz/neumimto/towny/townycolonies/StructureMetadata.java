@@ -2,6 +2,7 @@ package cz.neumimto.towny.townycolonies;
 
 import com.google.gson.*;
 import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
+import com.palmergames.bukkit.towny.object.metadata.StringDataField;
 import it.unimi.dsi.fastutil.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -11,7 +12,7 @@ import java.util.*;
 
 public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
 
-    private static Gson gson;
+    public static Gson gson;
 
     static {
         gson = new GsonBuilder()
@@ -38,9 +39,13 @@ public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
         super(TownyColonies.METADATA_KEY,data);
     }
 
+    public static String typeID() {
+        return "TownyColonies-Structure";
+    }
+
     @Override
     public @NotNull String getTypeID() {
-        return "TownyColonies-Structure";
+        return typeID();
     }
 
     @Override
@@ -49,7 +54,7 @@ public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
     }
 
     public String serializeValueToString() {
-        return gson.toJson(getValue());
+        return gson.toJson(getValue()).replaceAll("\"","\\\\\"");
     }
 
     @Override

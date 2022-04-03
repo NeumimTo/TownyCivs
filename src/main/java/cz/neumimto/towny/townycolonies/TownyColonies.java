@@ -5,6 +5,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.metadata.MetadataLoader;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
@@ -67,6 +68,9 @@ public final class TownyColonies extends JavaPlugin {
             e.printStackTrace();
         }
         TownyAPI.getInstance().addTranslations(this, translations);
+
+        MetadataLoader.getInstance()
+                .registerDeserializer(StructureMetadata.typeID(), new StructureMetadataDeserializer());
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 injector.getInstance(StructureScheduler.class),

@@ -23,7 +23,13 @@ public class StructureScheduler implements Runnable {
         for (Town town : towns) {
             if (town.hasMeta(TownyColonies.METADATA_KEY)) {
                 StructureMetadata metadata = town.getMetadata(TownyColonies.METADATA_KEY, StructureMetadata.class);
+                if (metadata == null) {
+                    continue;
+                }
                 StructureMetadata.Data value = metadata.getValue();
+                if (value.structures == null) {
+                    continue;
+                }
                 for (LoadedStructure structure : value.structures) {
                     configurationService.findStructureById(structure.id).ifPresent(d -> {
                         if (structure.lastTickTime + d.period * 1000 < tick) {
