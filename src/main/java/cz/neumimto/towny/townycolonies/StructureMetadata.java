@@ -3,6 +3,7 @@ package cz.neumimto.towny.townycolonies;
 import com.google.gson.*;
 import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
 import com.palmergames.bukkit.towny.object.metadata.StringDataField;
+import it.unimi.dsi.fastutil.BigArrays;
 import it.unimi.dsi.fastutil.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -75,18 +76,20 @@ public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
     public static class Data {
         public List<LoadedStructure> structures;
         public Map<String, Integer> blueprints;
+        public List<LoadedStructure> editMode;
 
         public Data() {
             this.structures = new ArrayList<>();
             this.blueprints = new HashMap<>();
+            this.editMode = new ArrayList<>();
         }
     }
 
     public static class LoadedStructure {
         public UUID uuid;
         public String id;
-        public Location pos1;
-        public Location pos2;
+        public Location center;
+
         public Location container;
         public long lastTickTime;
     }

@@ -8,6 +8,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.metadata.MetadataLoader;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
+import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
 import org.bukkit.Bukkit;
@@ -68,6 +69,8 @@ public final class TownyColonies extends JavaPlugin {
             e.printStackTrace();
         }
         TownyAPI.getInstance().addTranslations(this, translations);
+
+        Bukkit.getPluginManager().registerEvents(injector.getInstance(TownListener.class), this);
 
         MetadataLoader.getInstance()
                 .registerDeserializer(StructureMetadata.typeID(), new StructureMetadataDeserializer());

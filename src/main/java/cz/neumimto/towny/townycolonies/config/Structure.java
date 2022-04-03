@@ -36,13 +36,17 @@ public class Structure {
     @Path("MaxCount")
     public Integer maxCount;
 
-    @Path("Area")
+    @Path("AreaRadius")
     @Conversion(AreaConversion.class)
     public Area area;
 
     @Path("BuyRequirements")
     @Conversion(BuyReq.class)
     public List<LoadedPair<RequirementMechanic<?>,?>> buyRequirements;
+
+    @Path("BuildRequirements")
+    @Conversion(BuyReq.class)
+    public List<LoadedPair<RequirementMechanic<?>,?>> buildRequirements;
 
     @Path("Upkeep")
     @Conversion(Upkeep.class)
@@ -85,6 +89,13 @@ public class Structure {
         @Override
         protected Optional<RequirementMechanic> mechanic(MechanicService service, String name) {
             return service.buyReq(name);
+        }
+    }
+
+    public static class BuildReq extends LoadMechanic {
+        @Override
+        protected Optional<RequirementMechanic> mechanic(MechanicService service, String name) {
+            return service.placeReq(name);
         }
     }
 
