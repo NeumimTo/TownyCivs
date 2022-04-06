@@ -34,6 +34,12 @@ public class PluginConfig {
     @Path("copy_defaults")
     public boolean copyDefaults;
 
+    @Path("blueprint_lore_desc_template")
+    public String blueprintLoreDescTemplate;
+
+    @Path("blueprint_lore_template")
+    public List<String> blueprintLoreTemplate;
+
     public static class MapSLM implements Converter<Map<String, List<Material>>, Config> {
 
         @Override

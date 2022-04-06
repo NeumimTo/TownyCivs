@@ -28,7 +28,8 @@ public class Structure {
     public long period;
 
     @Path("Material")
-    public String material;
+    @Conversion(MaterialConversion.class)
+    public Material material;
 
     @Path("CustomModelData")
     public Integer customModelData;
@@ -43,6 +44,10 @@ public class Structure {
     @Path("BuyRequirements")
     @Conversion(BuyReq.class)
     public List<LoadedPair<RequirementMechanic<?>,?>> buyRequirements;
+
+    @Path("PlaceRequirements")
+    @Conversion(BuyReq.class)
+    public List<LoadedPair<RequirementMechanic<?>,?>> placeRequirements;
 
     @Path("BuildRequirements")
     @Conversion(BuyReq.class)
@@ -158,6 +163,18 @@ public class Structure {
         @Override
         public Config convertFromField(Map value) {
             return null;
+        }
+    }
+
+    public static class MaterialConversion implements Converter<Material, String> {
+        @Override
+        public Material convertToField(String value) {
+            return Material.matchMaterial(value);
+        }
+
+        @Override
+        public String convertFromField(Material value) {
+            return value.name();
         }
     }
 }

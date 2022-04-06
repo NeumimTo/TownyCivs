@@ -75,12 +75,10 @@ public class StructureMetadata extends CustomDataField<StructureMetadata.Data> {
 
     public static class Data {
         public List<LoadedStructure> structures;
-        public Map<String, Integer> blueprints;
         public List<LoadedStructure> editMode;
 
         public Data() {
             this.structures = new ArrayList<>();
-            this.blueprints = new HashMap<>();
             this.editMode = new ArrayList<>();
         }
     }

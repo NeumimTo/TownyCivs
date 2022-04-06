@@ -11,7 +11,13 @@ import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -44,6 +50,7 @@ public final class TownyColonies extends JavaPlugin {
                 bind(StructureScheduler.class);
                 bind(StructureService.class);
                 bind(MechanicService.class);
+                bind(ItemService.class);
             }
         });
 
@@ -74,6 +81,8 @@ public final class TownyColonies extends JavaPlugin {
 
         MetadataLoader.getInstance()
                 .registerDeserializer(StructureMetadata.typeID(), new StructureMetadataDeserializer());
+
+        injector.getInstance(ItemService.class).registerRecipes();
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 injector.getInstance(StructureScheduler.class),

@@ -27,17 +27,16 @@ public class SubclaimService {
     private Set<Region> subclaims = new HashSet<>();
 
     public Optional<Region> createRegion(StructureMetadata.LoadedStructure structure) {
-        return createRegion(structure.id, structure.center);
+        Optional<Structure> structureById = configurationService.findStructureById(structure.id);
+        if (structureById.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(createRegion(structureById.get(), structure.center));
     }
 
-    public Optional<Region> createRegion(String id, Location center) {
-        Optional<Structure> structureById = configurationService.findStructureById(id);
-        if (structureById.isPresent()) {
-            Structure def = structureById.get();
-            BoundingBox of = BoundingBox.of(center, def.area.x, def.area.y, def.area.z);
-            return  Optional.of(new Region(id, of, center.getWorld().getName()));
-        }
-        return Optional.empty();
+    public Region createRegion(Structure def, Location center) {
+        BoundingBox of = BoundingBox.of(center, def.area.x, def.area.y, def.area.z);
+        return new Region(def.id, of, center.getWorld().getName());
     }
 
     public void registerRegion(Region value) {
@@ -92,5 +91,14 @@ public class SubclaimService {
             return true;
         }
         return false;
+    }
+
+    public Optional<Structure> getStructureAt(Location location) {
+        for (Region subclaim : subclaims) {
+            if (subclaim.boundingBox.contains(location.getX(), location.getY(), location.getZ())) {
+                return configurationService.findStructureById(subclaim.structureId);
+            }
+        }
+        return Optional.empty();
     }
 }

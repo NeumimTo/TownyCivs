@@ -52,7 +52,7 @@ public class StructuresGui extends TCGui {
         List<StructureAndCount> structures = structureService.findTownStructures(town);
 
         for (StructureAndCount sc : structures) {
-            ItemStack itemStack = structureService.structureToItemstack(sc.structure, town, sc.count);
+            ItemStack itemStack = structureService.toItemStack(sc.structure, town, sc.count);
             map.put("Structures", List.of(new GuiCommand(itemStack, "townycolonies structure " + sc.structure.id)));
         }
 

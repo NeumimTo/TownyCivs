@@ -3,21 +3,25 @@ package cz.neumimto.towny.townycolonies.gui;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
-import cz.neumimto.towny.townycolonies.StructureMetadata;
+import cz.neumimto.towny.townycolonies.ManagementService;
 import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.api.GuiCommand;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
+import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class BlueprintsGui extends TCGui {
@@ -28,8 +32,11 @@ public class BlueprintsGui extends TCGui {
     @Inject
     private ConfigurationService configurationService;
 
+    @Inject
+    private ManagementService managementService;
+
     public BlueprintsGui() {
-        super("Blueprints.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
+        super("BuyBlueprints.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
     }
 
     public void display(Player player) {
@@ -38,24 +45,46 @@ public class BlueprintsGui extends TCGui {
     }
 
     @Override
+    protected String getTitle(CommandSender commandSender, GuiConfig guiConfig, String param) {
+        Town town = TownyAPI.getInstance().getResident((Player) commandSender).getTownOrNull();
+        return town.getPrefix() + " " + town.getName() + " - " + param;
+    }
+
+    @Override
     public Map<String, List<GuiCommand>> getPaneData(CommandSender commandSender, String param) {
-        Town town = TownyAPI.getInstance().getResident((Player)commandSender).getTownOrNull();
+        Player player = (Player) commandSender;
+        Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
         Map<String, List<GuiCommand>> map = new HashMap<>();
 
-        StructureMetadata metadata = structureService.getMetadata(town);
         List<GuiCommand> list = new ArrayList<>();
-        if (metadata != null) {
-            Map<String, Integer> blueprints = metadata.getValue().blueprints;
-            for (Map.Entry<String, Integer> stringIntegerEntry : blueprints.entrySet()) {
-                Optional<Structure> structureById = configurationService.findStructureById(stringIntegerEntry.getKey());
-                if (structureById.isPresent()) {
-                    Structure structure = structureById.get();
-                    ItemStack itemStack = structureService.structureToItemstack(structure, town, stringIntegerEntry.getValue());
-                    list.add(new GuiCommand(itemStack, "townycolonies place " + structure.id));
-                }
+
+        for (Structure structure : configurationService.getAll()) {
+
+            TownContext townContext = new TownContext();
+            townContext.town = town;
+            townContext.resident = TownyAPI.getInstance().getResident(player);
+            townContext.player = player;
+            townContext.structure = structure;
+
+            if (structureService.canBuy(townContext)) {
+                int buildCount = structureService.findTownStructureById(town, townContext.structure).count;
+                ItemStack itemStack = structureService.toItemStack(townContext.structure, town, buildCount);
+                list.add(new GuiCommand(itemStack, event -> {
+                    event.setCancelled(true);
+                    if (structureService.canBuy(townContext)) {
+                        ItemStack clone = structureService.buyBlueprint(townContext);
+                        HumanEntity whoClicked = event.getWhoClicked();
+                        HashMap<Integer, ItemStack> noFitItems = whoClicked.getInventory().addItem(clone);
+                        for (Map.Entry<Integer, ItemStack> entry : noFitItems.entrySet()) {
+                            whoClicked.getLocation().getWorld().dropItemNaturally(whoClicked.getLocation(), entry.getValue());
+                        }
+                    }
+                }));
             }
         }
+
         map.put("Blueprint", list);
         return map;
     }
+
 }

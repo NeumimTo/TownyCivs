@@ -53,7 +53,7 @@ public class StructureGui extends TCGui {
         Optional<Structure> structureById = configurationService.findStructureById(param);
         if (structureById.isPresent()) {
             StructureAndCount sc = structureService.findTownStructureById(town, structureById.get());
-            ItemStack itemStack = structureService.structureToItemstack(sc.structure, town, sc.count);
+            ItemStack itemStack = structureService.toItemStack(sc.structure, town, sc.count);
             map.put("Structure", List.of(new GuiCommand(itemStack)));
         }
         return map;

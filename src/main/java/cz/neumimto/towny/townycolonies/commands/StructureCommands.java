@@ -33,8 +33,7 @@ public class StructureCommands extends BaseCommand {
     @Inject
     private StructureService structureService;
 
-    @Inject
-    private BlueprintsGui blueprintsGui;
+
 
     @Default
     @CommandPermission("townycolonies.commands.common.mainmenu")
@@ -69,36 +68,5 @@ public class StructureCommands extends BaseCommand {
         structureGui.display(player, structureId);
     }
 
-    @Subcommand("blueprints|bp")
-    @CommandPermission("townycolonies.commands.common.mainmenu")
-    public void placeStructure(Player player) {
-        Resident resident = TownyAPI.getInstance().getResident(player);
-        if (resident == null || !resident.hasTown()) {
-            player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
-            return;
-        }
-        blueprintsGui.display(player);
-    }
 
-    @Subcommand("buy|b")
-    @CommandPermission("townycolonies.commands.mayor.buy")
-    public void buy(Player player, String structureId) {
-        Resident resident = TownyAPI.getInstance().getResident(player);
-        if (resident == null || !resident.hasTown()) {
-            player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
-            return;
-        }
-        structureService.buyBlueprint(player, structureId);
-    }
-
-    @Subcommand("place|p")
-    @CommandPermission("townycolonies.commands.architect.place")
-    public void place(Player player, String structureId) {
-        Resident resident = TownyAPI.getInstance().getResident(player);
-        if (resident == null || !resident.hasTown()) {
-            player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
-            return;
-        }
-        structureService.placeBlueprint(player, structureId);
-    }
 }
