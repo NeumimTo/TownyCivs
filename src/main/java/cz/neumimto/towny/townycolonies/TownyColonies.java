@@ -5,6 +5,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownySettings;
+import com.palmergames.bukkit.towny.db.TownyDataSource;
+import com.palmergames.bukkit.towny.db.TownySQLSource;
 import com.palmergames.bukkit.towny.object.metadata.MetadataLoader;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
@@ -53,6 +56,15 @@ public final class TownyColonies extends JavaPlugin {
                 bind(ItemService.class);
             }
         });
+
+        //TownyDataSource dataSource = TownyAPI.getInstance().getDataSource();
+        //if (!(dataSource instanceof TownySQLSource)) {
+        //    getLogger().log(Level.SEVERE,"TownyColonies require towny to use SQL database, if you wish flatfile support feel free to make a pr");
+        //    return;
+        //}
+//
+        //((TownySQLSource) dataSource).getHikariDataSource().getConnection
+        //TownySettings.getSQLTablePrefix().toUpperCase();
 
         injector.getInstance(MechanicService.class).registerDefaults();
         ConfigurationService configurationService = injector.getInstance(ConfigurationService.class);

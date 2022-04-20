@@ -20,14 +20,13 @@ import java.util.*;
 @Singleton
 public class StructureService {
 
+
+
     @Inject
     private ConfigurationService configurationService;
 
     @Inject
     private SubclaimService subclaimService;
-
-    private Map<UUID, Set<Location>> areaBorders = new HashMap<>();
-
 
     public StructureMetadata getMetadata(Town town) {
         return (StructureMetadata) town.getMetadata(TownyColonies.METADATA_KEY);

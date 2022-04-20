@@ -10,6 +10,7 @@ import cz.neumimto.towny.townycolonies.model.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
 
 import javax.inject.Inject;
@@ -41,6 +42,15 @@ public class SubclaimService {
 
     public void registerRegion(Region value) {
         subclaims.add(value);
+    }
+
+    public Optional<Region> regionAt(Location location) {
+        for (Region subclaim : subclaims) {
+            if (subclaim.overlaps(location)) {
+                return Optional.of(subclaim);
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<Region> overlaps(Region region) {

@@ -8,16 +8,21 @@ import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.WorldCoord;
 import cz.neumimto.towny.townycolonies.*;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
+import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
 import cz.neumimto.towny.townycolonies.model.Region;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -123,8 +128,6 @@ public class TownListener implements Listener {
                 }
             }
         }
-
-
     }
 
     @EventHandler
@@ -134,5 +137,55 @@ public class TownListener implements Listener {
 
         Optional<BlueprintItem> blueprintItem = configurationService.getBlueprintItem(itemDrop.getItemStack());
         blueprintItem.ifPresent(blueprintItem1 -> managementService.endSessionWithoutPlacement(player));
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void blockBreakEvent(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+
+        handleBlockEditingWithinRegion(player, block);
+    }
+
+    @EventHandler
+    public void blockPlaceEvent(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+
+        handleBlockEditingWithinRegion(player, block);
+    }
+
+    private void handleBlockEditingWithinRegion(Player player, Block block) {
+        Resident resident = TownyAPI.getInstance().getResident(player);
+        if (resident == null) {
+            return;
+        }
+        Town town = resident.getTownOrNull();
+        if (town == null) {
+            return;
+        }
+        WorldCoord worldCoord = WorldCoord.parseWorldCoord(block);
+        Town currentTown = worldCoord.getTownOrNull();
+        if (town != currentTown) {
+            return;
+        }
+        StructureMetadata metadata = structureService.getMetadata(town);
+        if (metadata == null) {
+            return;
+        }
+        StructureMetadata.Data value = metadata.getValue();
+        if (value.structures == null) {
+            return;
+        }
+        Optional<Region> structureAt = subclaimService.regionAt(block.getLocation());
+        if (structureAt.isPresent()) {
+            Region region = structureAt.get();
+            if (!region.editingAllowed) {
+                Structure structure = configurationService.findStructureById(region.structureId).get();
+                player.sendMessage(Component.text("Editing of " + structure.name + " is not allowed"));
+                player.sendMessage(Component.text("If you wish to edit " + structure.name + " craft an editing tool and righclick within this region"));
+                return;
+            }
+        }
     }
 }
