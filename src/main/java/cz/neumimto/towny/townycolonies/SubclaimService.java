@@ -6,11 +6,11 @@ import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.WorldCoord;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.util.BoundingBox;
 
 import javax.inject.Inject;
@@ -27,7 +27,7 @@ public class SubclaimService {
 
     private Set<Region> subclaims = new HashSet<>();
 
-    public Optional<Region> createRegion(StructureMetadata.LoadedStructure structure) {
+    public Optional<Region> createRegion(LoadedStructure structure) {
         Optional<Structure> structureById = configurationService.findStructureById(structure.id);
         if (structureById.isEmpty()) {
             return Optional.empty();

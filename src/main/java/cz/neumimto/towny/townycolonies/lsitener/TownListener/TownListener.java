@@ -11,6 +11,7 @@ import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -58,12 +59,10 @@ public class TownListener implements Listener {
     public void onTownLoad(TownyLoadedDatabaseEvent event) {
         Collection<Town> towns = TownyUniverse.getInstance().getTowns();
         for (Town town : towns) {
-            StructureMetadata metadata = structureService.getMetadata(town);
-            if (metadata != null) {
-                for (StructureMetadata.LoadedStructure structure : metadata.getValue().structures) {
-                    Optional<Region> region = subclaimService.createRegion(structure);
-                    region.ifPresent(value -> subclaimService.registerRegion(value));
-                }
+            Collection<LoadedStructure> structures = structureService.getAllStructures(town);
+            for (LoadedStructure structure : structures) {
+                Optional<Region> region = subclaimService.createRegion(structure);
+                region.ifPresent(value -> subclaimService.registerRegion(value));
             }
         }
     }
@@ -169,14 +168,7 @@ public class TownListener implements Listener {
         if (town != currentTown) {
             return;
         }
-        StructureMetadata metadata = structureService.getMetadata(town);
-        if (metadata == null) {
-            return;
-        }
-        StructureMetadata.Data value = metadata.getValue();
-        if (value.structures == null) {
-            return;
-        }
+
         Optional<Region> structureAt = subclaimService.regionAt(block.getLocation());
         if (structureAt.isPresent()) {
             Region region = structureAt.get();

@@ -6,6 +6,7 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.model.EditSession;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -176,25 +177,20 @@ public class ManagementService {
     public void placeBlueprint(Player player, Location location, Structure structure) {
         Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
 
-        StructureMetadata metadata = structureService.getMetadata(town);
-
-        if (metadata == null) {
-            metadata = new StructureMetadata(new StructureMetadata.Data());
-        }
 
         Location center = new Location(player.getWorld(), location.getX(),location.getY(),location.getZ());
 
-        StructureMetadata.LoadedStructure loadedStructure = new StructureMetadata.LoadedStructure();
+        LoadedStructure loadedStructure = new LoadedStructure();
         loadedStructure.uuid = UUID.randomUUID();
         loadedStructure.id = structure.id;
         loadedStructure.center = center;
 
-        metadata.getValue().structures.add(loadedStructure);
+        loadedStructure.structure = structure;
+
+        structureService.addToTown(town, loadedStructure);
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
         subclaimService.registerRegion(lreg);
-
-        town.addMetaData(metadata, true);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
     }

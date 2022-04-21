@@ -1,11 +1,13 @@
 package cz.neumimto.towny.townycolonies;
 
+import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
-import com.palmergames.bukkit.towny.object.metadata.CustomDataField;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
+import cz.neumimto.towny.townycolonies.db.Database;
 import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -20,7 +22,8 @@ import java.util.*;
 @Singleton
 public class StructureService {
 
-
+    private Map<UUID, LoadedStructure> structures = new HashMap<>();
+    private Map<UUID, Set<LoadedStructure>> byTown = new HashMap<>();
 
     @Inject
     private ConfigurationService configurationService;
@@ -28,23 +31,19 @@ public class StructureService {
     @Inject
     private SubclaimService subclaimService;
 
-    public StructureMetadata getMetadata(Town town) {
-        return (StructureMetadata) town.getMetadata(TownyColonies.METADATA_KEY);
+    public Collection<LoadedStructure> getAllStructures() {
+        return structures.values();
     }
 
-    public List<StructureMetadata.LoadedStructure> getAllStructures(Town town) {
-        CustomDataField<?> metadata = town.getMetadata(TownyColonies.METADATA_KEY);
-        if (metadata != null) {
-            return ((StructureMetadata)metadata).getValue().structures;
-        }
-        return Collections.emptyList();
+    public Collection<LoadedStructure> getAllStructures(Town town) {
+        return byTown.getOrDefault(town.getUUID(), Collections.emptySet());
     }
 
     public void isValidLocation(Structure structure, Location location) {
 
     }
 
-    public void addToTown(Structure structure, Town town,  Location location) {
+    public void addToTown(Structure structure, Town town, Location location) {
 
     }
 
@@ -62,19 +61,17 @@ public class StructureService {
         return itemStack;
     }
 
-
-
     public List<StructureAndCount> findTownStructures(Town town) {
         Collection<Structure> allStructures = configurationService.getAll();
-        List<StructureMetadata.LoadedStructure> townStructures = getAllStructures(town);
+        Collection<LoadedStructure> townStructures = getAllStructures(town);
 
-        Map<Structure,Integer> alreadyBuilt = new HashMap<>();
+        Map<Structure, Integer> alreadyBuilt = new HashMap<>();
         List<Structure> avalaible = new ArrayList<>();
 
         for (Structure structure : allStructures) {
             boolean found = false;
-            for (StructureMetadata.LoadedStructure townStructure : townStructures) {
-                if (townStructure.id.equalsIgnoreCase(structure.id)) {
+            for (LoadedStructure townStructure : townStructures) {
+                if (townStructure.structure == structure) {
                     alreadyBuilt.merge(structure, 1, Integer::sum);
                     found = true;
                 }
@@ -99,11 +96,11 @@ public class StructureService {
     }
 
     public StructureAndCount findTownStructureById(Town town, Structure structure) {
-        List<StructureMetadata.LoadedStructure> townStructures = getAllStructures(town);
+        Collection<LoadedStructure> townStructures = getAllStructures(town);
         int count = 0;
-        for (StructureMetadata.LoadedStructure townStructure : townStructures) {
-            if (townStructure.id.equalsIgnoreCase(structure.id)) {
-                count ++;
+        for (LoadedStructure townStructure : townStructures) {
+            if (townStructure.structure == structure) {
+                count++;
             }
         }
         return new StructureAndCount(structure, count);
@@ -134,11 +131,37 @@ public class StructureService {
         for (Structure.LoadedPair<RequirementMechanic<?>, ?> requirement : context.structure.buyRequirements) {
             Object configValue = requirement.configValue;
             var mechanic = (RequirementMechanic<Object>) requirement.mechanic;
-            if (!mechanic.check(context,configValue)) {
+            if (!mechanic.check(context, configValue)) {
                 mechanic.nokmessage(context, configValue);
                 pass = false;
             }
         }
         return pass;
+    }
+
+    public void addToTown(Town town, LoadedStructure loadedStructure) {
+
+    }
+
+    public void loadAll() {
+        Database.init();
+        List<Town> towns = TownyAPI.getInstance().getTowns();
+        Collection<LoadedStructure> loaded = Database.allStructures(towns);
+        loaded.stream()
+                .peek(a -> a.structure = configurationService.findStructureById(a.strucutureId).orElse(null))
+                .filter(a -> a.structure != null)
+                .peek(a -> structures.put(a.uuid, a))
+                .peek(a -> {
+                    Set<LoadedStructure> set = new HashSet<>();
+                    set.add(a);
+                    byTown.merge(a.town, set, (loadedStructures, loadedStructures2) -> {
+                        loadedStructures.addAll(loadedStructures2);
+                        return loadedStructures;
+                    });
+                });
+    }
+
+    public void saveAll() {
+        Database.saveAll(structures.values());
     }
 }

@@ -5,22 +5,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.TownySettings;
-import com.palmergames.bukkit.towny.db.TownyDataSource;
-import com.palmergames.bukkit.towny.db.TownySQLSource;
 import com.palmergames.bukkit.towny.object.metadata.MetadataLoader;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
@@ -57,14 +48,6 @@ public final class TownyColonies extends JavaPlugin {
             }
         });
 
-        //TownyDataSource dataSource = TownyAPI.getInstance().getDataSource();
-        //if (!(dataSource instanceof TownySQLSource)) {
-        //    getLogger().log(Level.SEVERE,"TownyColonies require towny to use SQL database, if you wish flatfile support feel free to make a pr");
-        //    return;
-        //}
-//
-        //((TownySQLSource) dataSource).getHikariDataSource().getConnection
-        //TownySettings.getSQLTablePrefix().toUpperCase();
 
         injector.getInstance(MechanicService.class).registerDefaults();
         ConfigurationService configurationService = injector.getInstance(ConfigurationService.class);
@@ -91,8 +74,6 @@ public final class TownyColonies extends JavaPlugin {
 
         Bukkit.getPluginManager().registerEvents(injector.getInstance(TownListener.class), this);
 
-        MetadataLoader.getInstance()
-                .registerDeserializer(StructureMetadata.typeID(), new StructureMetadataDeserializer());
 
         injector.getInstance(ItemService.class).registerRecipes();
 
