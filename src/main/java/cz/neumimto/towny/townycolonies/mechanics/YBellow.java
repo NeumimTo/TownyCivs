@@ -1,9 +1,8 @@
-package cz.neumimto.towny.townycolonies.mechanics.common;
+package cz.neumimto.towny.townycolonies.mechanics;
 
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
-import cz.neumimto.towny.townycolonies.mechanics.TownContext;
+import cz.neumimto.towny.townycolonies.mechanics.common.DoubleWrapper;
 
-public class YBellow implements RequirementMechanic<DoubleWrapper> {
+class YBellow implements RequirementMechanic<DoubleWrapper> {
 
     @Override
     public boolean check(TownContext townContext, DoubleWrapper configContext) {

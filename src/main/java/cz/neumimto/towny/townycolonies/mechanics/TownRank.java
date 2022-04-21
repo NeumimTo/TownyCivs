@@ -1,10 +1,8 @@
-package cz.neumimto.towny.townycolonies.mechanics.common;
+package cz.neumimto.towny.townycolonies.mechanics;
 
-import com.palmergames.bukkit.towny.TownyAPI;
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
-import cz.neumimto.towny.townycolonies.mechanics.TownContext;
+import cz.neumimto.towny.townycolonies.mechanics.common.DoubleWrapper;
 
-public class TownRank implements RequirementMechanic<DoubleWrapper> {
+class TownRank implements RequirementMechanic<DoubleWrapper> {
 
     @Override
     public boolean check(TownContext townContext, DoubleWrapper configContext) {

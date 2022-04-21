@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class ConfigurableGui {
@@ -152,7 +151,7 @@ public abstract class ConfigurableGui {
                     pane.bindItem(maskKez, new GuiCommand(i(commandSender, maskConfig), onClick.command.replaceAll("%ui_param%", param), commandSender));
                 }
             } else {
-                if (!maskConfig.id.toLowerCase().contains("minecraft:air") ) {
+                if (!maskConfig.id.toLowerCase().contains("minecraft:air")) {
                     pane.bindItem(maskKez, new GuiCommand(i(commandSender, maskConfig)));
                 }
             }

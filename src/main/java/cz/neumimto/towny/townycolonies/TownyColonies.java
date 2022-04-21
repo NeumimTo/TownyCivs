@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.metadata.MetadataLoader;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
@@ -66,7 +65,7 @@ public final class TownyColonies extends JavaPlugin {
             Properties properties = new Properties();
             properties.load(is);
 
-            translations.put("en_US", new HashMap<>((Map)properties));
+            translations.put("en_US", new HashMap<>((Map) properties));
         } catch (IOException e) {
             e.printStackTrace();
         }

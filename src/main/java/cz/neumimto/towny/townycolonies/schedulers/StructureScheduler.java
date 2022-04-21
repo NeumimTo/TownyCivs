@@ -1,9 +1,9 @@
 package cz.neumimto.towny.townycolonies.schedulers;
 
-import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 
 import javax.inject.Inject;
 import java.util.logging.Level;

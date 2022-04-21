@@ -1,7 +1,6 @@
 package cz.neumimto.towny.townycolonies;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -10,7 +9,6 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.inject.Singleton;
-import java.util.List;
 
 @Singleton
 public class ItemService {

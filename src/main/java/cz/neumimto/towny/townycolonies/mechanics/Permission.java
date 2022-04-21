@@ -1,9 +1,8 @@
-package cz.neumimto.towny.townycolonies.mechanics.common;
+package cz.neumimto.towny.townycolonies.mechanics;
 
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
-import cz.neumimto.towny.townycolonies.mechanics.TownContext;
+import cz.neumimto.towny.townycolonies.mechanics.common.StringWrapper;
 
-public class Permission implements RequirementMechanic<StringWrapper> {
+class Permission implements RequirementMechanic<StringWrapper> {
 
     @Override
     public boolean check(TownContext townContext, StringWrapper configContext) {

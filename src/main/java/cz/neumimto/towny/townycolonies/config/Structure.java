@@ -43,19 +43,19 @@ public class Structure {
 
     @Path("BuyRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>,?>> buyRequirements;
+    public List<LoadedPair<RequirementMechanic<?>, ?>> buyRequirements;
 
     @Path("PlaceRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>,?>> placeRequirements;
+    public List<LoadedPair<RequirementMechanic<?>, ?>> placeRequirements;
 
     @Path("BuildRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>,?>> buildRequirements;
+    public List<LoadedPair<RequirementMechanic<?>, ?>> buildRequirements;
 
     @Path("Upkeep")
     @Conversion(Upkeep.class)
-    public List<LoadedPair<RequirementMechanic<?>,?>> upkeep;
+    public List<LoadedPair<RequirementMechanic<?>, ?>> upkeep;
 
     @Path("Blocks")
     @Conversion(Blocks.class)
@@ -66,14 +66,14 @@ public class Structure {
         public final int z;
         public final int y;
 
-        public Area(int x,int z, int y) {
+        public Area(int x, int z, int y) {
             this.x = x;
             this.z = z;
             this.y = y;
         }
     }
 
-    public static class LoadedPair<M,C> {
+    public static class LoadedPair<M, C> {
         public final C configValue;
         public final M mechanic;
 
@@ -122,7 +122,7 @@ public class Structure {
                 if (requirementMechanic.isPresent()) {
                     RequirementMechanic m = requirementMechanic.get();
                     Object aNew = m.getNew();
-                    new ObjectConverter().toObject(config,aNew);
+                    new ObjectConverter().toObject(config, aNew);
                     mechs.add(new LoadedPair<>(aNew, m));
                 }
             }
@@ -149,12 +149,11 @@ public class Structure {
         }
     }
 
-    public static class Blocks implements Converter<Map,Config> {
+    public static class Blocks implements Converter<Map, Config> {
 
         @Override
         public Map convertToField(Config value) {
             Map map = new HashMap();
-
 
 
             return map;

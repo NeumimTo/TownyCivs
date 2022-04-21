@@ -1,6 +1,5 @@
 package cz.neumimto.towny.townycolonies;
 
-import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import org.bukkit.Location;
 import org.bukkit.Material;

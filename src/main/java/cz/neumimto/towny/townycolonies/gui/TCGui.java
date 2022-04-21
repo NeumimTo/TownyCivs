@@ -1,6 +1,5 @@
 package cz.neumimto.towny.townycolonies.gui;
 
-import com.palmergames.bukkit.towny.TownyAPI;
 import cz.neumimto.towny.townycolonies.gui.api.ConfigurableGui;
 import org.bukkit.command.CommandSender;
 

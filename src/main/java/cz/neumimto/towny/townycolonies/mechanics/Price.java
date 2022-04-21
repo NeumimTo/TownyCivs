@@ -1,11 +1,9 @@
-package cz.neumimto.towny.townycolonies.mechanics.common;
+package cz.neumimto.towny.townycolonies.mechanics;
 
 import com.palmergames.bukkit.towny.TownyMessaging;
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
-import cz.neumimto.towny.townycolonies.mechanics.TownContext;
+import cz.neumimto.towny.townycolonies.mechanics.common.DoubleWrapper;
 
-
-public class Price implements RequirementMechanic<DoubleWrapper> {
+class Price implements RequirementMechanic<DoubleWrapper> {
 
     @Override
     public boolean check(TownContext townContext, DoubleWrapper configContext) {

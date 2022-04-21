@@ -2,16 +2,17 @@ package cz.neumimto.towny.townycolonies.commands;
 
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.*;
+import co.aikar.commands.annotation.CommandAlias;
+import co.aikar.commands.annotation.CommandPermission;
+import co.aikar.commands.annotation.Default;
+import co.aikar.commands.annotation.Subcommand;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycolonies.StructureService;
-import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
 import cz.neumimto.towny.townycolonies.gui.MainMenuGui;
 import cz.neumimto.towny.townycolonies.gui.StructureGui;
 import cz.neumimto.towny.townycolonies.gui.StructuresGui;
-import org.bukkit.block.data.type.StructureBlock;
 import org.bukkit.entity.Player;
 
 import javax.inject.Inject;
@@ -32,7 +33,6 @@ public class StructureCommands extends BaseCommand {
 
     @Inject
     private StructureService structureService;
-
 
 
     @Default

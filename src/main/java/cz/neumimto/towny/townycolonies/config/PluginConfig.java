@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PluginConfig {
-    
+
     @Path("blockdb")
     @Conversion(MapSLM.class)
     public Map<String, List<Material>> blockdb = new HashMap<>();
@@ -24,7 +24,7 @@ public class PluginConfig {
 
     @Path("structure_lore_template")
     public List<String> structureLoreTemplate;
-    
+
     @Path("structure_lore_desc_templatc")
     public String structureLoreDescTemplate;
 

@@ -101,7 +101,7 @@ public class ConfigurationService {
             copy(structures, "cactus-farm.conf");
         }
 
-        try (var paths = Files.newDirectoryStream(structures)){
+        try (var paths = Files.newDirectoryStream(structures)) {
             paths.forEach(this::loadStructure);
         }
 
@@ -109,7 +109,7 @@ public class ConfigurationService {
 
     private void loadStructure(Path path) {
         Structure structure;
-        try (var f = FileConfig.of(path)){
+        try (var f = FileConfig.of(path)) {
             f.load();
             structure = new Structure();
             new ObjectConverter().toObject(f, structure);
@@ -117,7 +117,7 @@ public class ConfigurationService {
         } catch (Throwable t) {
             t.printStackTrace();
             TownyColonies.logger.log(Level.SEVERE, "Unable to read structure file " + path.getFileName());
-            return ;
+            return;
         }
         structures.put(structure.id, structure);
         registerBlueprint(structure, structure.material, structure.customModelData);
@@ -152,7 +152,7 @@ public class ConfigurationService {
                 list.addAll(descL);
             } else {
                 s = s.replaceFirst("\\{towncount}", String.valueOf(townCount))
-                    .replaceFirst("\\{maxcount}", String.valueOf(maxCount));
+                        .replaceFirst("\\{maxcount}", String.valueOf(maxCount));
 
                 list.add(mm.deserialize(s));
             }

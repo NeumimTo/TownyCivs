@@ -36,7 +36,7 @@ public class StructureGui extends TCGui {
 
     @Override
     protected String getTitle(CommandSender commandSender, GuiConfig guiConfig, String param) {
-        Town town = TownyAPI.getInstance().getResident((Player)commandSender).getTownOrNull();
+        Town town = TownyAPI.getInstance().getResident((Player) commandSender).getTownOrNull();
         return town.getName() + " - " + param;
     }
 
@@ -47,7 +47,7 @@ public class StructureGui extends TCGui {
 
     @Override
     public Map<String, List<GuiCommand>> getPaneData(CommandSender commandSender, String param, GuiConfig guiConfig) {
-        Town town = TownyAPI.getInstance().getResident((Player)commandSender).getTownOrNull();
+        Town town = TownyAPI.getInstance().getResident((Player) commandSender).getTownOrNull();
         Map<String, List<GuiCommand>> map = new HashMap<>();
 
         Optional<Structure> structureById = configurationService.findStructureById(param);

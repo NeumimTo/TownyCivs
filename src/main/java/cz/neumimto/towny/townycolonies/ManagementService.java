@@ -42,9 +42,8 @@ public class ManagementService {
     public boolean moveTo(Player player, Location location) {
         if (editSessions.containsKey(player.getUniqueId())) {
             EditSession editSession = editSessions.get(player.getUniqueId());
-            editSession.center = location.clone().add(0,editSession.structure.area.y - 1, 0);
+            editSession.center = location.clone().add(0, editSession.structure.area.y - 1, 0);
             Region region = subclaimService.createRegion(editSession.structure, editSession.center);
-
 
 
             Set<Location> locations = prepareVisualBox(player, editSession.center, editSession.structure.area);
@@ -70,7 +69,7 @@ public class ManagementService {
                 editSession.overlappintStructureBorder = prepareVisualBox(player, overlaps.get().boundingBox.getCenter().toLocation(player.getWorld()), overlapingStruct.area);
                 sendBlockChange(player, editSession.overlappintStructureBorder, Material.YELLOW_STAINED_GLASS);
 
-            } else if (editSession.overlappintStructureBorder != null){
+            } else if (editSession.overlappintStructureBorder != null) {
                 removeAreaBorder(player, editSession.overlappintStructureBorder);
                 editSession.overlappintStructureBorder = null;
             }
@@ -158,10 +157,10 @@ public class ManagementService {
         }
 
         for (double y = minY; y <= maxY; y++) {
-            blockChange(world, minX, y, minZ,set);
-            blockChange(world, maxX, y, maxZ,set);
-            blockChange(world, minX, y, maxZ,set);
-            blockChange(world, maxX, y, minZ,set);
+            blockChange(world, minX, y, minZ, set);
+            blockChange(world, maxX, y, maxZ, set);
+            blockChange(world, minX, y, maxZ, set);
+            blockChange(world, maxX, y, minZ, set);
         }
 
         return set;
@@ -178,7 +177,7 @@ public class ManagementService {
         Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
 
 
-        Location center = new Location(player.getWorld(), location.getX(),location.getY(),location.getZ());
+        Location center = new Location(player.getWorld(), location.getX(), location.getY(), location.getZ());
 
         LoadedStructure loadedStructure = new LoadedStructure();
         loadedStructure.uuid = UUID.randomUUID();
