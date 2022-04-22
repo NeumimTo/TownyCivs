@@ -10,6 +10,8 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycolonies.StructureService;
+import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.gui.MainMenuGui;
 import cz.neumimto.towny.townycolonies.gui.StructureGui;
 import cz.neumimto.towny.townycolonies.gui.StructuresGui;
@@ -34,6 +36,13 @@ public class StructureCommands extends BaseCommand {
     @Inject
     private StructureService structureService;
 
+    @Inject
+    private ConfigurationService configurationService;
+
+    @CommandPermission("townycolonies.admin")
+    public void reload() {
+        TownyColonies.INSTANCE.onEnable();
+    }
 
     @Default
     @CommandPermission("townycolonies.commands.common.mainmenu")

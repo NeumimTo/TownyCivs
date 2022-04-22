@@ -1,1 +1,1 @@
-select * from %prefix%townycolonies_structure where town_uuid in (%uuids%);
+select * from %prefix%townycolonies_structure;

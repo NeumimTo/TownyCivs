@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class StructureService {
@@ -144,14 +145,16 @@ public class StructureService {
     }
 
     public void loadAll() {
+        structures.clear();
         Database.init();
-        List<Town> towns = TownyAPI.getInstance().getTowns();
-        Collection<LoadedStructure> loaded = Database.allStructures(towns);
+        Collection<LoadedStructure> loaded = Database.allStructures();
+        Collection<UUID> towns = TownyAPI.getInstance().getTowns().stream().map(Town::getUUID).collect(Collectors.toSet());
         loaded.stream()
                 .peek(a -> a.structure = configurationService.findStructureById(a.strucutureId).orElse(null))
                 .filter(a -> a.structure != null)
+                .filter(a->towns.contains(a.town))
                 .peek(a -> structures.put(a.uuid, a))
-                .peek(a -> {
+                .forEach(a -> {
                     Set<LoadedStructure> set = new HashSet<>();
                     set.add(a);
                     byTown.merge(a.town, set, (loadedStructures, loadedStructures2) -> {

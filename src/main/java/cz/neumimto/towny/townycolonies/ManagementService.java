@@ -181,7 +181,7 @@ public class ManagementService {
 
         LoadedStructure loadedStructure = new LoadedStructure();
         loadedStructure.uuid = UUID.randomUUID();
-        loadedStructure.id = structure.id;
+        loadedStructure.strucutureId = structure.id;
         loadedStructure.center = center;
 
         loadedStructure.structure = structure;

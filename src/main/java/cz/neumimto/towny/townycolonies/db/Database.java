@@ -41,7 +41,9 @@ public class Database {
 
         int dbSchema = schemaVersion();
         while (dbSchema != currentSchema) {
+            TownyColonies.logger.info("Updating db schema to ver." + dbSchema);
             String query = queryFromFile("townycolonies_" + dbSchema + ".sql");
+            TownyColonies.logger.info(query);
             TownySQLSource sqlSource = (TownySQLSource) dataSource;
             try (var stmt = sqlSource.getHikariDataSource().getConnection().prepareStatement(query)) {
                 stmt.executeUpdate();
@@ -58,7 +60,7 @@ public class Database {
             String sql = queryFromFile("townycolonies_checkversion.sql");
             try (var statement = connection.prepareStatement(sql)) {
                 try (var rs = statement.executeQuery()) {
-                    if (rs.first()) {
+                    if (rs.next()) {
                         return rs.getInt("version");
                     }
                 }
@@ -70,17 +72,12 @@ public class Database {
         return 0;
     }
 
-    public static Collection<LoadedStructure> allStructures(Collection<Town> allTowns) {
+    public static Collection<LoadedStructure> allStructures() {
         Set<LoadedStructure> set = new HashSet<>();
         try {
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
 
             String qry = queryFromFile("townycolonies_all_structures.sql");
-            var ids = allTowns.stream()
-                    .map(Government::getUUID)
-                    .map(UUID::toString)
-                    .toList()
-                    .toArray(String[]::new);
             var gson = new Gson();
             Type containerType = new TypeToken<ArrayList<VirtualContainer>>() {
             }.getType();
@@ -89,8 +86,7 @@ public class Database {
 
 
             try (var statement = connection.prepareStatement(qry)) {
-                statement.setArray(1, connection.createArrayOf("varchar", ids));
-                try (var rs = statement.executeQuery();) {
+                try (var rs = statement.executeQuery()) {
                     while (rs.next()) {
                         var ls = new LoadedStructure();
                         ls.uuid = UUID.fromString(rs.getString("structure_uuid"));

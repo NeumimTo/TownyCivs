@@ -14,12 +14,16 @@ import javax.inject.Singleton;
 public class ItemService {
 
     public void registerRecipes() {
+        NamespacedKey recipe = NamespacedKey.fromString("townycolonies:town_book");
+        if (Bukkit.getServer().getRecipe(recipe) != null) {
+            Bukkit.getServer().removeRecipe(recipe);
+        }
         ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
         itemStack.editMeta(meta -> {
             meta.setCustomModelData(3077);
             meta.displayName(Component.text("Town administration"));
         });
-        ShapedRecipe shapedRecipe = new ShapedRecipe(NamespacedKey.fromString("townycolonies:town_book"), itemStack);
+        ShapedRecipe shapedRecipe = new ShapedRecipe(recipe, itemStack);
         shapedRecipe.shape(
                 "-S-",
                 "SPS",
@@ -28,6 +32,7 @@ public class ItemService {
         shapedRecipe.setIngredient('P', Material.BOOK);
         shapedRecipe.setIngredient('S', Material.GOLD_NUGGET);
         Bukkit.getServer().addRecipe(shapedRecipe);
+
     }
 
     public boolean isTownBook(ItemStack itemInUse) {

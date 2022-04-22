@@ -29,6 +29,9 @@ public class MechanicService {
     }
 
     public void registerDefaults() {
+        productionReq.clear();
+        buyReqs.clear();
+        placeReq.clear();
         buyReq("permission", new Permission());
         buyReq("price", new Price());
         buyReq("town_level", new TownRank());

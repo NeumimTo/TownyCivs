@@ -28,7 +28,7 @@ public class SubclaimService {
     private Set<Region> subclaims = new HashSet<>();
 
     public Optional<Region> createRegion(LoadedStructure structure) {
-        Optional<Structure> structureById = configurationService.findStructureById(structure.id);
+        Optional<Structure> structureById = configurationService.findStructureById(structure.strucutureId);
         if (structureById.isEmpty()) {
             return Optional.empty();
         }
