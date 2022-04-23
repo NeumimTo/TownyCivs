@@ -15,9 +15,7 @@ import org.bukkit.util.BoundingBox;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Singleton
 public class SubclaimService {
@@ -40,7 +38,8 @@ public class SubclaimService {
         return new Region(def.id, of, center.getWorld().getName());
     }
 
-    public void registerRegion(Region value) {
+    public void registerRegion(Region value, LoadedStructure loadedStructure) {
+        value.loadedStructure = loadedStructure;
         subclaims.add(value);
     }
 
@@ -110,5 +109,25 @@ public class SubclaimService {
             }
         }
         return Optional.empty();
+    }
+
+    public Region getRegion(UUID fromString) {
+        for (Region subclaim : subclaims) {
+            if (subclaim.uuid.equals(fromString)) {
+                return subclaim;
+            }
+        }
+        return null;
+    }
+
+    public void delete(Region region) {
+        Iterator<Region> iterator = subclaims.iterator();
+        while (iterator.hasNext()) {
+            Region next = iterator.next();
+            if (next == region) {
+                iterator.remove();
+                break;
+            }
+        }
     }
 }

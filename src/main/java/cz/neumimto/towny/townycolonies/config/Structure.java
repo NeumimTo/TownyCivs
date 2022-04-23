@@ -155,6 +155,12 @@ public class Structure {
         public Map convertToField(Config value) {
             Map map = new HashMap();
 
+            if (value != null) {
+                Map<String, Object> stringObjectMap = value.valueMap();
+                for (Map.Entry<String, Object> e : stringObjectMap.entrySet()) {
+                    map.put(e.getKey(), Integer.parseInt(e.getValue().toString()));
+                }
+            }
 
             return map;
         }

@@ -13,6 +13,7 @@ import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.VirtualContainer;
 import cz.neumimto.towny.townycolonies.model.VirtualInventory;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,9 +95,7 @@ public class Database {
                         ls.lastTickTime = rs.getLong("last_tick_time");
                         ls.strucutureId = rs.getString("structure_id");
                         String[] center = rs.getString("center").split(";");
-                        ls.x = Integer.parseInt(center[0]);
-                        ls.y = Integer.parseInt(center[1]);
-                        ls.z = Integer.parseInt(center[2]);
+                        ls.center = new Location(Bukkit.getWorld(center[0]),Integer.parseInt(center[1]),Integer.parseInt(center[2]),Integer.parseInt(center[3]));
                         ls.editMode = rs.getBoolean("edit_mode");
                         String containers = rs.getString("containers");
                         if (containers != null) {
@@ -134,13 +133,15 @@ public class Database {
         try {
             TownyColonies.logger.info("Saving structure " + structure.uuid);
             String sql = queryFromFile("townycolonies_insert.sql");
+            ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getContext();
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
             try (var stmt = connection.prepareStatement(sql)) {
                 stmt.setString(1, structure.uuid.toString()); //"structure_uuid"
                 stmt.setString(2, structure.town.toString()); //"town_uuid"
                 stmt.setLong(3, structure.lastTickTime); //"last_tick_time"
                 stmt.setString(4, structure.strucutureId); //"structure_id"
-                stmt.setString(5, structure.x + ";" + structure.y + ";" + structure.z); //"center"
+                Location center = structure.center;
+                stmt.setString(5, center.getWorld().getName()+";"+center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
                 stmt.setString(6, structure.containers == null ? null : gson.toJson(structure.containers)); //"containers"
                 stmt.setBoolean(7, structure.editMode); //"edit_mode"
                 stmt.setString(8, structure.storage == null ? null : gson.toJson(structure.storage)); //"storage"

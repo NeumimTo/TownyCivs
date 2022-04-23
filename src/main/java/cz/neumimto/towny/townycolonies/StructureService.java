@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
@@ -8,10 +9,12 @@ import cz.neumimto.towny.townycolonies.db.Database;
 import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
+import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -48,7 +51,7 @@ public class StructureService {
 
     }
 
-    public ItemStack toItemStack(Structure structure, Town context, int count) {
+    public ItemStack toItemStack(Structure structure, int count) {
         ItemStack itemStack = new ItemStack(structure.material);
         ItemMeta itemMeta = itemStack.getItemMeta();
 
@@ -56,7 +59,7 @@ public class StructureService {
         itemMeta.displayName(mm.deserialize(structure.name));
         itemMeta.setCustomModelData(structure.customModelData);
 
-        List<Component> lore = configurationService.buildStructureLore(structure, count, structure.maxCount, context);
+        List<Component> lore = configurationService.buildStructureLore(structure, count, structure.maxCount);
         itemMeta.lore(lore);
         itemStack.setItemMeta(itemMeta);
         return itemStack;
@@ -141,7 +144,10 @@ public class StructureService {
     }
 
     public void addToTown(Town town, LoadedStructure loadedStructure) {
-
+        structures.put(loadedStructure.uuid, loadedStructure);
+        loadedStructure.town = town.getUUID();
+        Set<LoadedStructure> loadedStructures = byTown.computeIfAbsent(town.getUUID(), k -> new HashSet<>());
+        loadedStructures.add(loadedStructure);
     }
 
     public void loadAll() {
@@ -154,6 +160,11 @@ public class StructureService {
                 .filter(a -> a.structure != null)
                 .filter(a->towns.contains(a.town))
                 .peek(a -> structures.put(a.uuid, a))
+                .peek(a-> {
+                    Set<LoadedStructure> loadedStructures = byTown.computeIfAbsent(a.town, k -> new HashSet<>());
+                    loadedStructures.add(a);
+                })
+                .peek(a-> subclaimService.createRegion(a).ifPresent(b->subclaimService.registerRegion(b,a)))
                 .forEach(a -> {
                     Set<LoadedStructure> set = new HashSet<>();
                     set.add(a);
@@ -167,4 +178,26 @@ public class StructureService {
     public void saveAll() {
         Database.saveAll(structures.values());
     }
+
+    public void save(LoadedStructure loadedStructure) {
+        Database.scheduleSave(loadedStructure);
+    }
+
+    public void delete(Region region, Player player) {
+        subclaimService.delete(region);
+        LoadedStructure l = region.loadedStructure;
+        structures.remove(l.uuid);
+        Set<LoadedStructure> loadedStructures = byTown.get(l.town);
+        Iterator<LoadedStructure> iterator = loadedStructures.iterator();
+        while (iterator.hasNext()) {
+            LoadedStructure next = iterator.next();
+            if (next == l) {
+                iterator.remove();
+                Town town = TownyAPI.getInstance().getTown(l.town);
+                TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structure.name);
+                break;
+            }
+        }
+    }
+
 }

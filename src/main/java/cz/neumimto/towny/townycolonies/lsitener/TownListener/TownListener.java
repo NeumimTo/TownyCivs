@@ -3,6 +3,7 @@ package cz.neumimto.towny.townycolonies.lsitener.TownListener;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.event.TownyLoadedDatabaseEvent;
+import com.palmergames.bukkit.towny.object.Coord;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.WorldCoord;
@@ -10,10 +11,12 @@ import cz.neumimto.towny.townycolonies.*;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
+import cz.neumimto.towny.townycolonies.gui.RegionGui;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
@@ -55,6 +58,9 @@ public class TownListener implements Listener {
     @Inject
     private ConfigurationService configurationService;
 
+    @Inject
+    private RegionGui regionGui;
+
     @EventHandler
     public void onTownLoad(TownyLoadedDatabaseEvent event) {
         Collection<Town> towns = TownyUniverse.getInstance().getTowns();
@@ -62,7 +68,7 @@ public class TownListener implements Listener {
             Collection<LoadedStructure> structures = structureService.getAllStructures(town);
             for (LoadedStructure structure : structures) {
                 Optional<Region> region = subclaimService.createRegion(structure);
-                region.ifPresent(value -> subclaimService.registerRegion(value));
+                region.ifPresent(value -> subclaimService.registerRegion(value, structure));
             }
         }
     }
@@ -70,9 +76,17 @@ public class TownListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        if (player.hasPermission(Permissions.ROLE_TOWN_ADMINISTRATIVE) && itemService.isTownBook(event.getItem())) {
+        ItemService.StructureTool itemType = itemService.getItemType(event.getItem());
+
+        if (player.hasPermission(Permissions.ROLE_TOWN_ADMINISTRATIVE) && itemType == ItemService.StructureTool.TOWN_TOOL) {
             event.setCancelled(true);
             handleTownBlookInteraction(player);
+            return;
+        }
+
+        if (itemType == ItemService.StructureTool.EDIT_TOOL && event.getClickedBlock() != null) {
+            event.setCancelled(true);
+            handleEditToolInteraction(player, event.getClickedBlock());
             return;
         }
 
@@ -91,6 +105,31 @@ public class TownListener implements Listener {
             return;
         }
 
+    }
+
+    private void handleEditToolInteraction(Player player, Block clickedBlock) {
+        Optional<Region> regionOptional = subclaimService.regionAt(clickedBlock.getLocation());
+        if (regionOptional.isEmpty()) {
+            MiniMessage miniMessage = MiniMessage.miniMessage();
+            player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>No structure at clicked location</red>"));
+            return;
+        }
+
+        Resident resident = TownyAPI.getInstance().getResident(player);
+        Town resTown = resident.getTownOrNull();
+        if (resTown == null) {
+            return;
+        }
+
+        WorldCoord worldCoord = WorldCoord.parseWorldCoord(clickedBlock);
+        if (worldCoord.getTownOrNull() != resTown) {
+            MiniMessage miniMessage = MiniMessage.miniMessage();
+            player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>No structure at clicked location</red>"));
+            return;
+        }
+
+        Region region = regionOptional.get();
+        regionGui.display(player, region);
     }
 
     private void handleTownBlookInteraction(Player player) {
@@ -119,9 +158,13 @@ public class TownListener implements Listener {
                         player.getInventory().setItem(hand, itemInUse);
                     } else {
                         managementService.startNewEditSession(player, blueprintItem.structure, location);
+                        managementService.moveTo(player, location);
                     }
                 } else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
                     if (managementService.hasEditSession(player)) {
+                        managementService.moveTo(player, location);
+                    } else {
+                        managementService.startNewEditSession(player, blueprintItem.structure, location);
                         managementService.moveTo(player, location);
                     }
                 }

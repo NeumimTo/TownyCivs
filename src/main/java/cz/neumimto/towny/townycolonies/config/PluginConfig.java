@@ -52,7 +52,7 @@ public class PluginConfig {
                 for (Config.Entry entry : value.entrySet()) {
                     String key = entry.getKey();
                     String v = entry.getValue();
-                    String[] split = v.split(",");
+                    String[] split = v.split(" ");
                     List<Material> materials = new ArrayList<>();
                     for (String s : split) {
                         s = s.trim();
@@ -60,8 +60,9 @@ public class PluginConfig {
                         if (material == null) {
                             Set<String> mats = Wildcards.substract(s.toUpperCase(Locale.ENGLISH), allNames);
                             materials.addAll(mats.stream().map(Material::matchMaterial).toList());
+                        } else {
+                            materials.add(material);
                         }
-                        materials.add(material);
                     }
                     map.put(key, materials);
                 }

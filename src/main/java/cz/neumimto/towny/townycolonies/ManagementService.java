@@ -8,6 +8,7 @@ import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.model.EditSession;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -36,6 +37,8 @@ public class ManagementService {
         var es = new EditSession(structure, location);
         es.structure = structure;
         editSessions.put(player.getUniqueId(), es);
+        MiniMessage miniMessage = MiniMessage.miniMessage();
+        player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <green>Right click again to change blueprint location, Left click to confirm selection and place blueprint</green>"));
         return es;
     }
 
@@ -59,7 +62,8 @@ public class ManagementService {
             if (overlaps.isPresent()) {
                 Region region1 = overlaps.get();
                 Structure overlapingStruct = configurationService.findStructureById(region1.structureId).get();
-                player.sendMessage(editSession.structure.name + " region overlaps with " + overlapingStruct.name);
+                MiniMessage miniMessage = MiniMessage.miniMessage();
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>"+editSession.structure.name + " region overlaps with " + overlapingStruct.name+"</red>"));
                 isOk = false;
 
                 if (editSession.overlappintStructureBorder != null) {
@@ -76,7 +80,8 @@ public class ManagementService {
 
             Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
             if (subclaimService.isOutsideTownClaim(region, town)) {
-                player.sendMessage(editSession.structure.name + " is outside town claim");
+                MiniMessage miniMessage = MiniMessage.miniMessage();
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>"+editSession.structure.name + " is outside town claim"+"</red>"));
                 isOk = false;
             }
 
@@ -101,7 +106,7 @@ public class ManagementService {
     }
 
     public void endSession(Player player, Location location) {
-        if (editSessions.containsKey(player.getUniqueId())) {
+         if (editSessions.containsKey(player.getUniqueId())) {
             EditSession editSession = editSessions.get(player.getUniqueId());
             editSession.center = location;
             if (moveTo(player, editSession.center)) {
@@ -184,14 +189,16 @@ public class ManagementService {
         loadedStructure.strucutureId = structure.id;
         loadedStructure.center = center;
 
+        loadedStructure.town = town.getUUID();
         loadedStructure.structure = structure;
-
+        loadedStructure.editMode = true;
         structureService.addToTown(town, loadedStructure);
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
-        subclaimService.registerRegion(lreg);
+        subclaimService.registerRegion(lreg, loadedStructure);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
+        structureService.save(loadedStructure);
     }
 
     private void sendBlockChange(Player player, Set<Location> locations, Material mat) {

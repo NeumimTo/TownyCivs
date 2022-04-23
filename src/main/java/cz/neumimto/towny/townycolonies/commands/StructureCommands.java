@@ -40,6 +40,7 @@ public class StructureCommands extends BaseCommand {
     private ConfigurationService configurationService;
 
     @CommandPermission("townycolonies.admin")
+    @Subcommand("reload")
     public void reload() {
         TownyColonies.INSTANCE.onEnable();
     }

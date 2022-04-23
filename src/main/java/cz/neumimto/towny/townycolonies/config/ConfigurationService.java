@@ -137,8 +137,7 @@ public class ConfigurationService {
 
     public List<Component> buildStructureLore(Structure structure,
                                               int townCount,
-                                              int maxCount,
-                                              Town town) {
+                                              int maxCount) {
         var mm = MiniMessage.miniMessage();
 
         List<Component> list = new ArrayList<>();
@@ -174,5 +173,9 @@ public class ConfigurationService {
             }
         }
         return list;
+    }
+
+    public Collection<Material> getBlockGroup(String group) {
+        return config.blockdb.getOrDefault(group, Collections.emptyList());
     }
 }

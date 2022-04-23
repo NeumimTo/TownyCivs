@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.inject.Singleton;
@@ -23,29 +24,54 @@ public class ItemService {
             meta.setCustomModelData(3077);
             meta.displayName(Component.text("Town administration"));
         });
-        ShapedRecipe shapedRecipe = new ShapedRecipe(recipe, itemStack);
-        shapedRecipe.shape(
-                "-S-",
-                "SPS",
-                "-S-"
-        );
-        shapedRecipe.setIngredient('P', Material.BOOK);
-        shapedRecipe.setIngredient('S', Material.GOLD_NUGGET);
-        Bukkit.getServer().addRecipe(shapedRecipe);
+        ShapelessRecipe shapelessRecipe = new ShapelessRecipe(recipe, itemStack);
+        shapelessRecipe.addIngredient(Material.BOOK);
+        shapelessRecipe.addIngredient(Material.EMERALD);
 
+        Bukkit.getServer().addRecipe(shapelessRecipe);
+
+        recipe = NamespacedKey.fromString("townycolonies:structure_tool");
+        if (Bukkit.getServer().getRecipe(recipe) != null) {
+            Bukkit.getServer().removeRecipe(recipe);
+        }
+        itemStack = new ItemStack(Material.PAPER);
+        itemStack.editMeta(meta -> {
+            meta.setCustomModelData(3078);
+            meta.displayName(Component.text("Structure Edit Tool"));
+        });
+        ShapelessRecipe editTool = new ShapelessRecipe(recipe, itemStack);
+        editTool.addIngredient(Material.PAPER);
+        editTool.addIngredient(Material.WOODEN_SHOVEL);
+        Bukkit.getServer().addRecipe(editTool);
     }
 
-    public boolean isTownBook(ItemStack itemInUse) {
+    public StructureTool getItemType(ItemStack itemInUse) {
         if (itemInUse == null) {
-            return false;
+            return null;
         }
-        if (itemInUse.getType() != Material.ENCHANTED_BOOK) {
-            return false;
+
+        if (itemInUse.getType() == Material.ENCHANTED_BOOK) {
+            ItemMeta itemMeta = itemInUse.getItemMeta();
+            if (itemMeta.hasCustomModelData()) {
+                if (itemMeta.getCustomModelData() == 3077) {
+                    return StructureTool.TOWN_TOOL;
+                }
+            }
         }
-        ItemMeta itemMeta = itemInUse.getItemMeta();
-        if (itemMeta.hasCustomModelData()) {
-            return itemMeta.getCustomModelData() == 3077;
+
+        if (itemInUse.getType() == Material.PAPER) {
+            ItemMeta itemMeta = itemInUse.getItemMeta();
+            if (itemMeta.hasCustomModelData()) {
+                if (itemMeta.getCustomModelData() == 3078) {
+                    return StructureTool.EDIT_TOOL;
+                }
+            }
         }
-        return false;
+
+        return null;
+    }
+
+    public static enum StructureTool {
+        EDIT_TOOL, TOWN_TOOL
     }
 }

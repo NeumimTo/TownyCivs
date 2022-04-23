@@ -31,7 +31,7 @@ public class StructureGui extends TCGui {
     private ConfigurationService configurationService;
 
     public StructureGui() {
-        super("Structure.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
+        super("Region.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StructureGui extends TCGui {
         Optional<Structure> structureById = configurationService.findStructureById(param);
         if (structureById.isPresent()) {
             StructureAndCount sc = structureService.findTownStructureById(town, structureById.get());
-            ItemStack itemStack = structureService.toItemStack(sc.structure, town, sc.count);
+            ItemStack itemStack = structureService.toItemStack(sc.structure, sc.count);
             map.put("Structure", List.of(new GuiCommand(itemStack)));
         }
         return map;

@@ -68,7 +68,7 @@ public class BlueprintsGui extends TCGui {
 
             if (structureService.canBuy(townContext)) {
                 int buildCount = structureService.findTownStructureById(town, townContext.structure).count;
-                ItemStack itemStack = structureService.toItemStack(townContext.structure, town, buildCount);
+                ItemStack itemStack = structureService.toItemStack(townContext.structure, buildCount);
                 list.add(new GuiCommand(itemStack, event -> {
                     event.setCancelled(true);
                     if (structureService.canBuy(townContext)) {

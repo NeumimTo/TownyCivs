@@ -23,10 +23,6 @@ public class LoadedStructure {
 
     public transient Structure structure;
 
-    public int x;
-    public int y;
-    public int z;
-
     public LoadedStructure clone() {
         var l = new LoadedStructure();
         l.uuid = uuid;
@@ -44,9 +40,6 @@ public class LoadedStructure {
         }
         l.lastTickTime = lastTickTime;
         l.editMode = editMode;
-        l.x = x;
-        l.y = y;
-        l.z = z;
         return l;
     }
 }
