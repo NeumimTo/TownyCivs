@@ -19,7 +19,7 @@ public class StructureScheduler implements Runnable {
     @Override
     public void run() {
         for (LoadedStructure structure : structureService.getAllStructures()) {
-            if (structure.lastTickTime <= System.currentTimeMillis() && !structure.editMode && structure.structure != null) {
+            if (structure.lastTickTime <= System.currentTimeMillis() && !structure.editMode && structure.structureDef != null) {
                 structure.lastTickTime = System.currentTimeMillis();
                 handleTick(structure);
             }
@@ -27,6 +27,6 @@ public class StructureScheduler implements Runnable {
     }
 
     private void handleTick(LoadedStructure structure) {
-        TownyColonies.logger.log(Level.INFO, "Ticking region " + structure.structure.id);
+        TownyColonies.logger.log(Level.INFO, "Ticking region " + structure.structureDef.id);
     }
 }

@@ -1,6 +1,8 @@
 package cz.neumimto.towny.townycolonies;
 
 import co.aikar.commands.PaperCommandManager;
+import com.electronwill.nightconfig.core.Config;
+import com.electronwill.nightconfig.core.file.FileConfig;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -88,6 +90,7 @@ public final class TownyColonies extends JavaPlugin {
         if (task != null) {
             task.cancel();
         }
+
         task = Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 injector.getInstance(StructureScheduler.class),
                 0L,

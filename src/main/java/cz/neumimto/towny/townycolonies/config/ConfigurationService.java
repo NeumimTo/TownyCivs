@@ -1,9 +1,11 @@
 package cz.neumimto.towny.townycolonies.config;
 
 
+import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.palmergames.bukkit.towny.object.Town;
+import cz.neumimto.towny.townycolonies.Materials;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
 import net.kyori.adventure.text.Component;
@@ -95,6 +97,10 @@ public class ConfigurationService {
             PluginConfig config = new PluginConfig();
             new ObjectConverter().toObject(f, config);
             this.config = config;
+
+
+            Config a = f.get("block_database");
+            Materials.init(a);
         }
 
         if (config.copyDefaults) {
@@ -173,9 +179,5 @@ public class ConfigurationService {
             }
         }
         return list;
-    }
-
-    public Collection<Material> getBlockGroup(String group) {
-        return config.blockdb.getOrDefault(group, Collections.emptyList());
     }
 }

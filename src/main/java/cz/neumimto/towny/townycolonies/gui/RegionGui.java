@@ -5,26 +5,23 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Town;
-import cz.neumimto.towny.townycolonies.StructureService;
-import cz.neumimto.towny.townycolonies.SubclaimService;
-import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.*;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
-import cz.neumimto.towny.townycolonies.config.PluginConfig;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.api.GuiCommand;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
 import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BundleMeta;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,6 +39,8 @@ public class RegionGui extends TCGui {
     @Inject
     private StructureService structureService;
 
+    @Inject
+    private ManagementService managementService;
 
     public RegionGui() {
         super("Region.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
@@ -72,8 +71,8 @@ public class RegionGui extends TCGui {
         Region region = subclaimService.getRegion(UUID.fromString(param));
 
 
-        StructureAndCount count = structureService.findTownStructureById(town, region.loadedStructure.structure);
-        ItemStack structureInfoStack = structureService.toItemStack(region.loadedStructure.structure, count.count);
+        StructureAndCount count = structureService.findTownStructureById(town, region.loadedStructure.structureDef);
+        ItemStack structureInfoStack = structureService.toItemStack(region.loadedStructure.structureDef, count.count);
 
         map.put("Structure", List.of(new GuiCommand(structureInfoStack, e -> e.setCancelled(true))));
 
@@ -96,8 +95,14 @@ public class RegionGui extends TCGui {
             itemMeta.lore(lore);
         });
         map.put("EditModeToggle", List.of(new GuiCommand(editMode, e->{
-            region.loadedStructure.editMode = !region.loadedStructure.editMode;
             e.setCancelled(true);
+            boolean prev = region.loadedStructure.editMode;
+            managementService.toggleEditMode(region.loadedStructure, (Player) e.getWhoClicked());
+            if (prev == region.loadedStructure.editMode) {
+                e.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+                return;
+            }
+
             display((Player) e.getWhoClicked(), region);
         })));
 
@@ -115,63 +120,87 @@ public class RegionGui extends TCGui {
         ItemStack remBlocks = new ItemStack(Material.IRON_AXE);
         remBlocks.editMeta(itemMeta -> {
             itemMeta.displayName(mm.deserialize("<yellow>Remaining build requirements</yellow>"));
+            itemMeta.addItemFlags(ItemFlag.values());
         });
         map.put("RemainingBlocks", List.of(new GuiCommand(remBlocks, e ->{
             e.setCancelled(true);
-            ChestGui chestGui = new ChestGui(6, "Remaining Blocks");
+            ChestGui chestGui = remainingBlocksGui(region);
+            chestGui.show(e.getWhoClicked());
+        })));
 
-            StaticPane staticPane = new StaticPane(9, 6);
-            chestGui.addPane(staticPane);
-            Map<String, Integer> blocks = region.loadedStructure.structure.blocks;
-            int x = 0;
-            int y = 0;
-            for (Map.Entry<String, Integer> entry : blocks.entrySet()) {
-                String key = entry.getKey();
-                if (key.startsWith("tc:")) {
+        return map;
+    }
+
+    @NotNull
+    private ChestGui remainingBlocksGui(Region region) {
+        MiniMessage mm = MiniMessage.miniMessage();
+        ChestGui chestGui = new ChestGui(6, "Remaining Blocks");
+
+        StaticPane staticPane = new StaticPane(9, 6);
+        chestGui.addPane(staticPane);
+        int x = 0;
+        int y = 0;
+        Map<String, Integer> requirements = region.loadedStructure.structureDef.blocks;
+
+        for (Map.Entry<String, Integer> entry : subclaimService.remainingBlocks(region).entrySet()) {
+            String key = entry.getKey();
+            Integer remaining = entry.getValue();
+            if (key.startsWith("tc:")) {
+                if (remaining <= 0) {
+                    continue;
+                }
+                ItemStack itemStack = new ItemStack(Material.BUNDLE);
+                itemStack.editMeta(itemMeta -> {
+                    String group = key.substring(3);
+                    Integer req = requirements.get(key);
+                    int current = req - remaining;
+                    itemMeta.displayName(mm.deserialize(group + " - " + current + "/"+req+"x"));
+                    BundleMeta bundleMeta = (BundleMeta) itemMeta;
+
+                    Collection<Material> blockGroup = Materials.getMaterials(key);
+                    for (Material material : blockGroup) {
+                        bundleMeta.addItem(new ItemStack(material));
+                    }
+                });
+                staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
+            } else if (key.startsWith("!tc:")) {
+                    if (remaining == 0) {
+                        continue;
+                    }
                     ItemStack itemStack = new ItemStack(Material.BUNDLE);
                     itemStack.editMeta(itemMeta -> {
-                        String group = key.substring(3);
-                        itemMeta.displayName(mm.deserialize(group + " - " + entry.getValue() + "x"));
+                        String group = key.substring(4);
+                        Integer req = requirements.get(key);
+                        int current = req - remaining;
+                        itemMeta.displayName(mm.deserialize(group + " " + current+ "/ exactly " + req + "x"));
                         BundleMeta bundleMeta = (BundleMeta) itemMeta;
 
-                        Collection<Material> blockGroup = configurationService.getBlockGroup(group);
+                        Collection<Material> blockGroup = Materials.getMaterials(key.substring(1));
                         for (Material material : blockGroup) {
                             bundleMeta.addItem(new ItemStack(material));
                         }
                     });
                     staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
-                } else if (key.startsWith("!tc:")) {
-                        ItemStack itemStack = new ItemStack(Material.BUNDLE);
-                        itemStack.editMeta(itemMeta -> {
-                            String group = key.substring(4);
-                            itemMeta.displayName(mm.deserialize(group + " - exactly " + entry.getValue() + "x"));
-                            BundleMeta bundleMeta = (BundleMeta) itemMeta;
-
-                            Collection<Material> blockGroup = configurationService.getBlockGroup(group);
-                            for (Material material : blockGroup) {
-                                bundleMeta.addItem(new ItemStack(material));
-                            }
-                        });
-                        staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
-                } else {
-                    Material material = Material.matchMaterial(entry.getKey());
-                    ItemStack itemStack = new ItemStack(material);
-                    itemStack.editMeta(itemMeta -> {
-                       itemMeta.displayName(mm.deserialize(material.name() + " - " + entry.getValue() + "x"));
-                    });
-                    staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)),x,y);
+            } else {
+                if (remaining <= 0) {
+                    continue;
                 }
-                x++;
-                if (x == 8) {
-                    x = 0;
-                    y++;
-                }
+                Material material = Material.matchMaterial(entry.getKey());
+                ItemStack itemStack = new ItemStack(material);
+                itemStack.editMeta(itemMeta -> {
+                    Integer req = requirements.get(key);
+                    int current = req - remaining;
+                    itemMeta.displayName(mm.deserialize(material.name() + " - " + current + "/"+req+"x"));
+                });
+                staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)),x,y);
             }
-
-            chestGui.show(e.getWhoClicked());
-        })));
-
-        return map;
+            x++;
+            if (x == 8) {
+                x = 0;
+                y++;
+            }
+        }
+        return chestGui;
     }
 
 }

@@ -11,8 +11,6 @@ public class Region {
     public final String structureId;
     public final BoundingBox boundingBox;
     public final String world;
-    public boolean editingAllowed;
-
     public LoadedStructure loadedStructure;
 
     public Region(String structureId, BoundingBox boundingBox, String world) {

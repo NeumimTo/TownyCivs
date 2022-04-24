@@ -38,4 +38,4 @@ Tested on:
 
 - Players
   - Build structure according to the blueprint block requirements
-  - Once the build is finished they need to call the architect to toggle edit mode
+  - Once the build is finish;ed they need to call the architect to toggle edit mode

@@ -45,7 +45,7 @@ public class ManagementService {
     public boolean moveTo(Player player, Location location) {
         if (editSessions.containsKey(player.getUniqueId())) {
             EditSession editSession = editSessions.get(player.getUniqueId());
-            editSession.center = location.clone().add(0, editSession.structure.area.y - 1, 0);
+            editSession.center = location.clone().add(0, editSession.structure.area.y + 1, 0);
             Region region = subclaimService.createRegion(editSession.structure, editSession.center);
 
 
@@ -134,19 +134,18 @@ public class ManagementService {
     }
 
     public Set<Location> prepareVisualBox(Player player, Location location, Structure.Area area) {
-        double maxX = location.getX() + area.x + 1;
+        double maxX = location.getX() + area.x;
         double minX = location.getX() - area.x - 1;
 
-        double maxY = location.getY() + area.y + 1;
+        double maxY = location.getY() + area.y;
         double minY = location.getY() - area.y - 1;
 
-        double maxZ = location.getZ() + area.z + 1;
+        double maxZ = location.getZ() + area.z;
         double minZ = location.getZ() - area.z - 1;
 
         World world = location.getWorld();
 
         Set<Location> set = new HashSet<>();
-        //todo all in one cycle
         for (double x = minX; x <= maxX; x++) {
             blockChange(world, x, minY, minZ, set);
             blockChange(world, x, maxY, maxZ, set);
@@ -181,16 +180,15 @@ public class ManagementService {
     public void placeBlueprint(Player player, Location location, Structure structure) {
         Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
 
-
         Location center = new Location(player.getWorld(), location.getX(), location.getY(), location.getZ());
 
         LoadedStructure loadedStructure = new LoadedStructure();
         loadedStructure.uuid = UUID.randomUUID();
-        loadedStructure.strucutureId = structure.id;
+        loadedStructure.structureId = structure.id;
         loadedStructure.center = center;
 
         loadedStructure.town = town.getUUID();
-        loadedStructure.structure = structure;
+        loadedStructure.structureDef = structure;
         loadedStructure.editMode = true;
         structureService.addToTown(town, loadedStructure);
 
@@ -199,6 +197,25 @@ public class ManagementService {
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
         structureService.save(loadedStructure);
+    }
+
+    public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
+        Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
+        if (!loadedStructure.editMode) {
+            loadedStructure.editMode = true;
+            TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " put " + loadedStructure.structureDef.name +  " into edit mode ");
+            structureService.save(loadedStructure);
+        } else {
+            Region region = subclaimService.getRegion(loadedStructure);
+            Map<String, Integer> remainingBlocks = subclaimService.remainingBlocks(region);
+            if (subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
+                loadedStructure.editMode = false;
+                structureService.save(loadedStructure);
+            } else {
+                MiniMessage miniMessage = MiniMessage.miniMessage();
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" +loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
+            }
+        }
     }
 
     private void sendBlockChange(Player player, Set<Location> locations, Material mat) {

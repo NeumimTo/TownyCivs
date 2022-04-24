@@ -3,7 +3,6 @@ package cz.neumimto.towny.townycolonies.lsitener.TownListener;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.event.TownyLoadedDatabaseEvent;
-import com.palmergames.bukkit.towny.object.Coord;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.WorldCoord;
@@ -21,6 +20,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -186,7 +186,7 @@ public class TownListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        handleBlockEditingWithinRegion(player, block);
+        handleBlockEditingWithinRegion(player, block, event);
     }
 
     @EventHandler
@@ -194,10 +194,10 @@ public class TownListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        handleBlockEditingWithinRegion(player, block);
+        handleBlockEditingWithinRegion(player, block, event);
     }
 
-    private void handleBlockEditingWithinRegion(Player player, Block block) {
+    private void handleBlockEditingWithinRegion(Player player, Block block, Cancellable event) {
         Resident resident = TownyAPI.getInstance().getResident(player);
         if (resident == null) {
             return;
@@ -215,10 +215,11 @@ public class TownListener implements Listener {
         Optional<Region> structureAt = subclaimService.regionAt(block.getLocation());
         if (structureAt.isPresent()) {
             Region region = structureAt.get();
-            if (!region.editingAllowed) {
+            if (!region.loadedStructure.editMode) {
                 Structure structure = configurationService.findStructureById(region.structureId).get();
                 player.sendMessage(Component.text("Editing of " + structure.name + " is not allowed"));
                 player.sendMessage(Component.text("If you wish to edit " + structure.name + " craft an editing tool and righclick within this region"));
+                event.setCancelled(true);
                 return;
             }
         }

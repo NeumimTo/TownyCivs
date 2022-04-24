@@ -75,7 +75,7 @@ public class StructureService {
         for (Structure structure : allStructures) {
             boolean found = false;
             for (LoadedStructure townStructure : townStructures) {
-                if (townStructure.structure == structure) {
+                if (townStructure.structureDef == structure) {
                     alreadyBuilt.merge(structure, 1, Integer::sum);
                     found = true;
                 }
@@ -103,7 +103,7 @@ public class StructureService {
         Collection<LoadedStructure> townStructures = getAllStructures(town);
         int count = 0;
         for (LoadedStructure townStructure : townStructures) {
-            if (townStructure.structure == structure) {
+            if (townStructure.structureDef == structure) {
                 count++;
             }
         }
@@ -156,8 +156,8 @@ public class StructureService {
         Collection<LoadedStructure> loaded = Database.allStructures();
         Collection<UUID> towns = TownyAPI.getInstance().getTowns().stream().map(Town::getUUID).collect(Collectors.toSet());
         loaded.stream()
-                .peek(a -> a.structure = configurationService.findStructureById(a.strucutureId).orElse(null))
-                .filter(a -> a.structure != null)
+                .peek(a -> a.structureDef = configurationService.findStructureById(a.structureId).orElse(null))
+                .filter(a -> a.structureDef != null)
                 .filter(a->towns.contains(a.town))
                 .peek(a -> structures.put(a.uuid, a))
                 .peek(a-> {
@@ -194,7 +194,7 @@ public class StructureService {
             if (next == l) {
                 iterator.remove();
                 Town town = TownyAPI.getInstance().getTown(l.town);
-                TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structure.name);
+                TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
                 break;
             }
         }

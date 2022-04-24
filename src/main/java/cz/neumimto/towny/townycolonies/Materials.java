@@ -12,9 +12,14 @@ import java.util.stream.Stream;
 public class Materials {
 
     private static Map<Material, Set<String>> blockRegistry = new HashMap<>();
+    private static Map<String, Set<Material>> materialsByTag = new HashMap<>();
 
     public static Collection<String> getTags(Material material) {
         return blockRegistry.getOrDefault(material, Collections.emptySet());
+    }
+
+    public static Collection<Material> getMaterials(String tag) {
+        return materialsByTag.getOrDefault(tag, Collections.emptySet());
     }
 
     public static void init(Config config) {
@@ -37,9 +42,16 @@ public class Materials {
             for (String s2 : substract) {
                 Material material = Material.matchMaterial(s2);
                 if (material != null) {
+                    String group = "tc:" + tag;
                     Set<String> set = new HashSet<>();
-                    set.add(tag);
+                    set.add(group);
                     blockRegistry.merge(material, set, (a, b) -> {
+                        a.addAll(b);
+                        return a;
+                    });
+                    Set<Material> m = new HashSet<>();
+                    m.add(material);
+                    materialsByTag.merge(group, m, (a,b)->{
                         a.addAll(b);
                         return a;
                     });

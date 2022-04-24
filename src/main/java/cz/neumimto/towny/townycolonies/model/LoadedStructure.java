@@ -11,7 +11,7 @@ public class LoadedStructure {
 
     public UUID town;
 
-    public String strucutureId;
+    public String structureId;
     public Location center;
 
     public List<VirtualContainer> containers;
@@ -21,13 +21,14 @@ public class LoadedStructure {
 
     public boolean editMode;
 
-    public transient Structure structure;
+    public transient Structure structureDef;
 
     public LoadedStructure clone() {
         var l = new LoadedStructure();
         l.uuid = uuid;
         l.town = town;
         l.center = center;
+        l.structureId = structureId;
         if (containers != null) {
             for (VirtualContainer c : containers) {
                 l.containers.add(c.clone());

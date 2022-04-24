@@ -6,8 +6,6 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.db.TownySQLSource;
-import com.palmergames.bukkit.towny.object.Government;
-import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.VirtualContainer;
@@ -93,7 +91,7 @@ public class Database {
                         ls.uuid = UUID.fromString(rs.getString("structure_uuid"));
                         ls.town = UUID.fromString(rs.getString("town_uuid"));
                         ls.lastTickTime = rs.getLong("last_tick_time");
-                        ls.strucutureId = rs.getString("structure_id");
+                        ls.structureId = rs.getString("structure_id");
                         String[] center = rs.getString("center").split(";");
                         ls.center = new Location(Bukkit.getWorld(center[0]),Integer.parseInt(center[1]),Integer.parseInt(center[2]),Integer.parseInt(center[3]));
                         ls.editMode = rs.getBoolean("edit_mode");
@@ -105,6 +103,7 @@ public class Database {
                         if (storage != null) {
                             ls.storage = gson.fromJson(containers, invType);
                         }
+                        set.add(ls);
                     }
                 }
             }
@@ -139,7 +138,7 @@ public class Database {
                 stmt.setString(1, structure.uuid.toString()); //"structure_uuid"
                 stmt.setString(2, structure.town.toString()); //"town_uuid"
                 stmt.setLong(3, structure.lastTickTime); //"last_tick_time"
-                stmt.setString(4, structure.strucutureId); //"structure_id"
+                stmt.setString(4, structure.structureId); //"structure_id"
                 Location center = structure.center;
                 stmt.setString(5, center.getWorld().getName()+";"+center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
                 stmt.setString(6, structure.containers == null ? null : gson.toJson(structure.containers)); //"containers"

@@ -14,7 +14,7 @@ class MStructure implements RequirementMechanic<StringWrapper> {
     public boolean check(TownContext townContext, StringWrapper configContext) {
         return structureService.getAllStructures()
                 .stream()
-                .anyMatch(a -> a.structure.id.contains(configContext.value));
+                .anyMatch(a -> a.structureDef.id.contains(configContext.value));
     }
 
     @Override
