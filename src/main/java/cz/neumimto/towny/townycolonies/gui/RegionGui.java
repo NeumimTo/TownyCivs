@@ -77,12 +77,12 @@ public class RegionGui extends TCGui {
         map.put("Structure", List.of(new GuiCommand(structureInfoStack, e -> e.setCancelled(true))));
 
         MiniMessage mm = MiniMessage.miniMessage();
-        ItemStack editMode = new ItemStack(region.loadedStructure.editMode ? Material.RED_WOOL : Material.GREEN_WOOL);
+        ItemStack editMode = new ItemStack(managementService.isBeingEdited(region.loadedStructure) ? Material.RED_WOOL : Material.GREEN_WOOL);
         editMode.editMeta(itemMeta -> {
             var lore = new ArrayList<Component>();
 
             String editModeS = null;
-            if (region.loadedStructure.editMode) {
+            if (managementService.isBeingEdited(region.loadedStructure)) {
                 editModeS = "<red>Active<red>";
             } else {
                 editModeS = "<green>Inactive<green>";
@@ -96,9 +96,9 @@ public class RegionGui extends TCGui {
         });
         map.put("EditModeToggle", List.of(new GuiCommand(editMode, e->{
             e.setCancelled(true);
-            boolean prev = region.loadedStructure.editMode;
+            boolean prev = managementService.isBeingEdited(region.loadedStructure);
             managementService.toggleEditMode(region.loadedStructure, (Player) e.getWhoClicked());
-            if (prev == region.loadedStructure.editMode) {
+            if (prev == managementService.isBeingEdited(region.loadedStructure)) {
                 e.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                 return;
             }

@@ -7,7 +7,7 @@ import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.conversion.Path;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
+import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -43,23 +43,30 @@ public class Structure {
 
     @Path("BuyRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>, ?>> buyRequirements;
+    public List<LoadedPair<Mechanic<?>, ?>> buyRequirements;
 
     @Path("PlaceRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>, ?>> placeRequirements;
+    public List<LoadedPair<Mechanic<?>, ?>> placeRequirements;
 
     @Path("BuildRequirements")
     @Conversion(BuyReq.class)
-    public List<LoadedPair<RequirementMechanic<?>, ?>> buildRequirements;
+    public List<LoadedPair<Mechanic<?>, ?>> buildRequirements;
 
     @Path("Upkeep")
     @Conversion(Upkeep.class)
-    public List<LoadedPair<RequirementMechanic<?>, ?>> upkeep;
+    public List<LoadedPair<Mechanic<Object>, Object>> upkeep;
 
     @Path("Blocks")
     @Conversion(Blocks.class)
     public Map<String, Integer> blocks;
+
+    @Path("SaveEachNTicks")
+    public int saveEachNTicks;
+
+    @Path("Production")
+    @Conversion(Production.class)
+    public List<LoadedPair<Mechanic<Object>,Object>> production;
 
     public static class Area {
         public final int x;
@@ -75,38 +82,46 @@ public class Structure {
 
     public static class LoadedPair<M, C> {
         public final C configValue;
-        public final M mechanic;
+        public final Mechanic<C> mechanic;
 
-        public LoadedPair(C configValue, M mechanic) {
+        public LoadedPair(C configValue, Mechanic<C> mechanic) {
             this.configValue = configValue;
             this.mechanic = mechanic;
         }
     }
 
-    public static class Upkeep extends LoadMechanic {
+    public static class Production extends ConfiguredMechanic {
         @Override
-        protected Optional<RequirementMechanic> mechanic(MechanicService service, String name) {
+        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
+            return service.prodMech(name);
+        }
+    }
+
+
+    public static class Upkeep extends ConfiguredMechanic {
+        @Override
+        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
             return service.prodReq(name);
         }
     }
 
-    public static class BuyReq extends LoadMechanic {
+    public static class BuyReq extends ConfiguredMechanic {
         @Override
-        protected Optional<RequirementMechanic> mechanic(MechanicService service, String name) {
+        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
             return service.buyReq(name);
         }
     }
 
-    public static class BuildReq extends LoadMechanic {
+    public static class BuildReq extends ConfiguredMechanic {
         @Override
-        protected Optional<RequirementMechanic> mechanic(MechanicService service, String name) {
+        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
             return service.placeReq(name);
         }
     }
 
-    public static abstract class LoadMechanic implements Converter<List<?>, List<Config>> {
+    public static abstract class ConfiguredMechanic implements Converter<List<?>, List<Config>> {
 
-        protected abstract Optional<RequirementMechanic> mechanic(MechanicService service, String name);
+        protected abstract Optional<Mechanic> mechanic(MechanicService service, String name);
 
         @Override
         public List convertToField(List<Config> value) {
@@ -118,9 +133,9 @@ public class Structure {
 
             for (Config config : value) {
                 String mechanic = config.get("Mechanic");
-                Optional<RequirementMechanic> requirementMechanic = mechanic(registry, mechanic);
-                if (requirementMechanic.isPresent()) {
-                    RequirementMechanic m = requirementMechanic.get();
+                Optional<Mechanic> mech = mechanic(registry, mechanic);
+                if (mech.isPresent()) {
+                    Mechanic m = mech.get();
                     Object aNew = m.getNew();
                     new ObjectConverter().toObject(config, aNew);
                     mechs.add(new LoadedPair<>(aNew, m));
@@ -182,5 +197,6 @@ public class Structure {
             return value.name();
         }
     }
+
 }
 

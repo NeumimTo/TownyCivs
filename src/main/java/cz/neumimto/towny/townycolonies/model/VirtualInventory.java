@@ -1,17 +1,15 @@
 package cz.neumimto.towny.townycolonies.model;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class VirtualInventory {
     public UUID containerUUID;
-    public Map<String, Integer> map = new HashMap<>();
+    public Map<String, Integer> content = new HashMap<>();
 
     protected VirtualInventory clone() {
         VirtualInventory virtualInventory = new VirtualInventory();
         virtualInventory.containerUUID = this.containerUUID;
-        virtualInventory.map.putAll(map);
+        virtualInventory.content.putAll(content);
         return virtualInventory;
     }
 }

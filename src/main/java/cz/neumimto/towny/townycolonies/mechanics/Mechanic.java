@@ -1,6 +1,6 @@
 package cz.neumimto.towny.townycolonies.mechanics;
 
-public interface RequirementMechanic<C> {
+public interface Mechanic<C> {
 
     boolean check(TownContext townContext, C configContext);
 

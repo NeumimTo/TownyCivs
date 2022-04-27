@@ -72,11 +72,6 @@ public class ConfigurationService {
     public Collection<Structure> getAll() {
         return structures.values();
     }
-
-    public long smallestPeriod() {
-        return structures.values().stream().mapToLong(value -> value.period).min().orElse(Long.MAX_VALUE);
-    }
-
     public void load(Path path) throws IOException {
         structures.clear();
         Path structures = path.resolve("structures");

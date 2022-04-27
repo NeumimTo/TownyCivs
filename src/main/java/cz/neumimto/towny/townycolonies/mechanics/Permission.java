@@ -2,7 +2,7 @@ package cz.neumimto.towny.townycolonies.mechanics;
 
 import cz.neumimto.towny.townycolonies.mechanics.common.StringWrapper;
 
-class Permission implements RequirementMechanic<StringWrapper> {
+class Permission implements Mechanic<StringWrapper> {
 
     @Override
     public boolean check(TownContext townContext, StringWrapper configContext) {

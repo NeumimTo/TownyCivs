@@ -8,6 +8,9 @@ import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.model.EditSession;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
+import cz.neumimto.towny.townycolonies.schedulers.SaveCommand;
+import cz.neumimto.towny.townycolonies.schedulers.SetEditModeCommand;
+import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,6 +27,8 @@ public class ManagementService {
 
     private Map<UUID, EditSession> editSessions = new HashMap<>();
 
+    Set<UUID> structuresBeingEdited = new HashSet<>();
+
     @Inject
     private StructureService structureService;
 
@@ -32,6 +37,11 @@ public class ManagementService {
 
     @Inject
     private ConfigurationService configurationService;
+
+    @Inject
+    private StructureScheduler structureScheduler;
+
+
 
     public EditSession startNewEditSession(Player player, Structure structure, Location location) {
         var es = new EditSession(structure, location);
@@ -190,10 +200,11 @@ public class ManagementService {
         loadedStructure.town = town.getUUID();
         loadedStructure.structureDef = structure;
         loadedStructure.editMode = true;
-        structureService.addToTown(town, loadedStructure);
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
         subclaimService.registerRegion(lreg, loadedStructure);
+
+        structureService.addToTown(town, loadedStructure);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
         structureService.save(loadedStructure);
@@ -201,21 +212,30 @@ public class ManagementService {
 
     public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
         Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
-        if (!loadedStructure.editMode) {
-            loadedStructure.editMode = true;
+
+        if (!structuresBeingEdited.contains(loadedStructure.uuid)) {
+            structuresBeingEdited.add(loadedStructure.uuid);
             TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " put " + loadedStructure.structureDef.name +  " into edit mode ");
-            structureService.save(loadedStructure);
+
+            structureScheduler.addCommand(new SetEditModeCommand(loadedStructure.uuid, true));
+
         } else {
+
             Region region = subclaimService.getRegion(loadedStructure);
             Map<String, Integer> remainingBlocks = subclaimService.remainingBlocks(region);
             if (subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
-                loadedStructure.editMode = false;
-                structureService.save(loadedStructure);
+                structuresBeingEdited.remove(loadedStructure.uuid);
+
+                structureScheduler.addCommand(new SetEditModeCommand(loadedStructure.uuid, false));
             } else {
                 MiniMessage miniMessage = MiniMessage.miniMessage();
                 player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" +loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
             }
         }
+    }
+
+    public boolean isBeingEdited(LoadedStructure loadedStructure) {
+        return structuresBeingEdited.contains(loadedStructure.uuid);
     }
 
     private void sendBlockChange(Player player, Set<Location> locations, Material mat) {

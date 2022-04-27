@@ -7,8 +7,4 @@ public class DoubleWrapper implements Wrapper {
     @Path("Value")
     public double value;
 
-    @Override
-    public Object value() {
-        return Double.valueOf(value);
-    }
 }

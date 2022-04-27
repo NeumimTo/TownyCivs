@@ -6,11 +6,14 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.db.Database;
-import cz.neumimto.towny.townycolonies.mechanics.RequirementMechanic;
+import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
+import cz.neumimto.towny.townycolonies.schedulers.RegisterStructureCommand;
+import cz.neumimto.towny.townycolonies.schedulers.RemoveStructureCommand;
+import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
@@ -27,7 +30,6 @@ import java.util.stream.Collectors;
 public class StructureService {
 
     private Map<UUID, LoadedStructure> structures = new HashMap<>();
-    private Map<UUID, Set<LoadedStructure>> byTown = new HashMap<>();
 
     @Inject
     private ConfigurationService configurationService;
@@ -35,19 +37,22 @@ public class StructureService {
     @Inject
     private SubclaimService subclaimService;
 
+    @Inject
+    private StructureScheduler structureScheduler;
+
+    @Inject
+    private ManagementService managementService;
+
     public Collection<LoadedStructure> getAllStructures() {
         return structures.values();
     }
 
+
     public Collection<LoadedStructure> getAllStructures(Town town) {
-        return byTown.getOrDefault(town.getUUID(), Collections.emptySet());
+        return structures.values().stream().filter(a->a.town.equals(town.getUUID())).collect(Collectors.toSet());
     }
 
     public void isValidLocation(Structure structure, Location location) {
-
-    }
-
-    public void addToTown(Structure structure, Town town, Location location) {
 
     }
 
@@ -111,9 +116,9 @@ public class StructureService {
     }
 
     public ItemStack buyBlueprint(TownContext townContext) {
-        for (Structure.LoadedPair<RequirementMechanic<?>, ?> requirement : townContext.structure.buyRequirements) {
+        for (Structure.LoadedPair<Mechanic<?>, ?> requirement : townContext.structure.buyRequirements) {
             Object configValue = requirement.configValue;
-            var mechanic = (RequirementMechanic<Object>) requirement.mechanic;
+            var mechanic = (Mechanic<Object>) requirement.mechanic;
             mechanic.postAction(townContext, configValue);
             mechanic.okmessage(townContext, configValue);
         }
@@ -132,9 +137,9 @@ public class StructureService {
 
     public boolean canBuy(TownContext context) {
         boolean pass = true;
-        for (Structure.LoadedPair<RequirementMechanic<?>, ?> requirement : context.structure.buyRequirements) {
+        for (Structure.LoadedPair<Mechanic<?>, ?> requirement : context.structure.buyRequirements) {
             Object configValue = requirement.configValue;
-            var mechanic = (RequirementMechanic<Object>) requirement.mechanic;
+            var mechanic = (Mechanic<Object>) requirement.mechanic;
             if (!mechanic.check(context, configValue)) {
                 mechanic.nokmessage(context, configValue);
                 pass = false;
@@ -146,8 +151,7 @@ public class StructureService {
     public void addToTown(Town town, LoadedStructure loadedStructure) {
         structures.put(loadedStructure.uuid, loadedStructure);
         loadedStructure.town = town.getUUID();
-        Set<LoadedStructure> loadedStructures = byTown.computeIfAbsent(town.getUUID(), k -> new HashSet<>());
-        loadedStructures.add(loadedStructure);
+        structureScheduler.addCommand(new RegisterStructureCommand(loadedStructure));
     }
 
     public void loadAll() {
@@ -159,19 +163,15 @@ public class StructureService {
                 .peek(a -> a.structureDef = configurationService.findStructureById(a.structureId).orElse(null))
                 .filter(a -> a.structureDef != null)
                 .filter(a->towns.contains(a.town))
-                .peek(a -> structures.put(a.uuid, a))
-                .peek(a-> {
-                    Set<LoadedStructure> loadedStructures = byTown.computeIfAbsent(a.town, k -> new HashSet<>());
-                    loadedStructures.add(a);
+                .peek(a -> {
+                    if (a.editMode) {
+                        managementService.structuresBeingEdited.add(a.uuid);
+                    }
                 })
                 .peek(a-> subclaimService.createRegion(a).ifPresent(b->subclaimService.registerRegion(b,a)))
                 .forEach(a -> {
-                    Set<LoadedStructure> set = new HashSet<>();
-                    set.add(a);
-                    byTown.merge(a.town, set, (loadedStructures, loadedStructures2) -> {
-                        loadedStructures.addAll(loadedStructures2);
-                        return loadedStructures;
-                    });
+                    Town town = TownyAPI.getInstance().getTown(a.town);
+                    addToTown(town, a);
                 });
     }
 
@@ -187,17 +187,9 @@ public class StructureService {
         subclaimService.delete(region);
         LoadedStructure l = region.loadedStructure;
         structures.remove(l.uuid);
-        Set<LoadedStructure> loadedStructures = byTown.get(l.town);
-        Iterator<LoadedStructure> iterator = loadedStructures.iterator();
-        while (iterator.hasNext()) {
-            LoadedStructure next = iterator.next();
-            if (next == l) {
-                iterator.remove();
-                Town town = TownyAPI.getInstance().getTown(l.town);
-                TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
-                break;
-            }
-        }
+        structureScheduler.addCommand(new RemoveStructureCommand(l));
+        Town town = TownyAPI.getInstance().getTown(l.town);
+        TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
     }
 
 }

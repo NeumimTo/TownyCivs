@@ -5,7 +5,7 @@ import cz.neumimto.towny.townycolonies.mechanics.common.StringWrapper;
 
 import javax.inject.Inject;
 
-class MStructure implements RequirementMechanic<StringWrapper> {
+class MStructure implements Mechanic<StringWrapper> {
 
     @Inject
     private StructureService structureService;

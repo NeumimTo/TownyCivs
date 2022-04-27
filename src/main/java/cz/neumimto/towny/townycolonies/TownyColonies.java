@@ -93,8 +93,7 @@ public final class TownyColonies extends JavaPlugin {
 
         task = Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 injector.getInstance(StructureScheduler.class),
-                0L,
-                configurationService.smallestPeriod() * 20);
+                0L, 100);
 
         reloading = true;
         getLogger().info("TownyColonies started");

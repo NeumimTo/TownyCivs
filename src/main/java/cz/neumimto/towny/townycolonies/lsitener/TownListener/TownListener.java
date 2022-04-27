@@ -3,6 +3,7 @@ package cz.neumimto.towny.townycolonies.lsitener.TownListener;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.event.TownyLoadedDatabaseEvent;
+import com.palmergames.bukkit.towny.event.time.dailytaxes.PreTownPaysNationTaxEvent;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.WorldCoord;
@@ -61,16 +62,9 @@ public class TownListener implements Listener {
     @Inject
     private RegionGui regionGui;
 
-    @EventHandler
-    public void onTownLoad(TownyLoadedDatabaseEvent event) {
-        Collection<Town> towns = TownyUniverse.getInstance().getTowns();
-        for (Town town : towns) {
-            Collection<LoadedStructure> structures = structureService.getAllStructures(town);
-            for (LoadedStructure structure : structures) {
-                Optional<Region> region = subclaimService.createRegion(structure);
-                region.ifPresent(value -> subclaimService.registerRegion(value, structure));
-            }
-        }
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onTax(PreTownPaysNationTaxEvent event) {
+        //todo
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -215,7 +209,7 @@ public class TownListener implements Listener {
         Optional<Region> structureAt = subclaimService.regionAt(block.getLocation());
         if (structureAt.isPresent()) {
             Region region = structureAt.get();
-            if (!region.loadedStructure.editMode) {
+            if (!managementService.isBeingEdited(region.loadedStructure)) {
                 Structure structure = configurationService.findStructureById(region.structureId).get();
                 player.sendMessage(Component.text("Editing of " + structure.name + " is not allowed"));
                 player.sendMessage(Component.text("If you wish to edit " + structure.name + " craft an editing tool and righclick within this region"));
