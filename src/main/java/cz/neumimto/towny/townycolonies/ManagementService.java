@@ -1,20 +1,22 @@
 package cz.neumimto.towny.townycolonies;
 
+import com.github.stefvanschie.inventoryframework.HumanEntityCache;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
-import cz.neumimto.towny.townycolonies.model.EditSession;
-import cz.neumimto.towny.townycolonies.model.LoadedStructure;
-import cz.neumimto.towny.townycolonies.model.Region;
-import cz.neumimto.towny.townycolonies.schedulers.SaveCommand;
+import cz.neumimto.towny.townycolonies.lsitener.TownListener.VirtualStorageHelper;
+import cz.neumimto.towny.townycolonies.model.*;
 import cz.neumimto.towny.townycolonies.schedulers.SetEditModeCommand;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
+import cz.neumimto.towny.townycolonies.schedulers.ViewVirtualContainerCommand;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
@@ -26,6 +28,8 @@ import java.util.*;
 public class ManagementService {
 
     private Map<UUID, EditSession> editSessions = new HashMap<>();
+
+    private Map<Location, UUID> contaienrs = new HashMap<>();
 
     Set<UUID> structuresBeingEdited = new HashSet<>();
 
@@ -40,7 +44,7 @@ public class ManagementService {
 
     @Inject
     private StructureScheduler structureScheduler;
-
+    private Map<Location, UUID> managedContainerBlocks = new HashMap<>();
 
 
     public EditSession startNewEditSession(Player player, Structure structure, Location location) {
@@ -202,12 +206,27 @@ public class ManagementService {
         loadedStructure.editMode = true;
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
+
+        Collection<Material> materials = Materials.getMaterials("tc:container");
+        Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
+        Map<VirtualContainer, VirtualContent> inv = VirtualStorageHelper.prepareVirtualinventory(lreg, map);
+        for (Map.Entry<VirtualContainer, VirtualContent> entry : inv.entrySet()) {
+            loadedStructure.containers.add(entry.getKey());
+            loadedStructure.storage.add(entry.getValue());
+            registerManagedContainerBlock(entry.getKey());
+        }
+
+
         subclaimService.registerRegion(lreg, loadedStructure);
 
         structureService.addToTown(town, loadedStructure);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
         structureService.save(loadedStructure);
+    }
+
+    public void registerManagedContainerBlock(VirtualContainer key) {
+        managedContainerBlocks.put(new Location(Bukkit.getServer().getWorld(key.world), key.x, key.y, key.z), key.id);
     }
 
     public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
@@ -245,5 +264,21 @@ public class ManagementService {
             map.put(location, data);
         }
         player.sendMultiBlockChange(map, false);
+    }
+    public void openVirtualContainer(LoadedStructure loadedStructure, UUID container, Location location, Player player) {
+        UUID uuid = contaienrs.get(location);
+        structureScheduler.addCommand(new ViewVirtualContainerCommand(loadedStructure.uuid, uuid, player, location.clone()));
+    }
+
+    public UUID getVirtualContainer(Location location) {
+        return managedContainerBlocks.get(location);
+    }
+
+    public void removeManagedContainerBlock(LoadedStructure loadedStructure) {
+        if (loadedStructure.containers != null) {
+            for (VirtualContainer key : loadedStructure.containers) {
+                managedContainerBlocks.remove(new Location(Bukkit.getServer().getWorld(key.world), key.x, key.y, key.z));
+            }
+        }
     }
 }

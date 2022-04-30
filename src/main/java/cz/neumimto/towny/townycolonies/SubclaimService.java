@@ -8,12 +8,22 @@ import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
+import cz.neumimto.towny.townycolonies.model.VirtualContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -157,6 +167,26 @@ public class SubclaimService {
             }
         }
         return map;
+    }
+
+    public Collection<Block> blocksWithinRegion(Collection<Material> filter, Region region) {
+        Location center = region.loadedStructure.center.clone();
+        BoundingBox bb = region.boundingBox;
+        World world = center.getWorld();
+        Set<Block> blocks = new HashSet<>();
+
+        for (int x = (int) bb.getMinX(); x < bb.getMaxX(); x++) {
+            for (int z = (int) bb.getMinZ(); z < bb.getMaxZ(); z++) {
+                for (int y = (int) bb.getMinY(); y < bb.getMaxY(); y++) {
+                    Block blockAt = world.getBlockAt(x, y, z);
+                    if (filter.contains(blockAt.getType())) {
+                        blocks.add(blockAt);
+                    }
+                }
+            }
+        }
+
+        return blocks;
     }
 
     public Map<String, Integer> remainingBlocks(Region region) {

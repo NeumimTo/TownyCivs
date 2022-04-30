@@ -9,7 +9,7 @@ import com.palmergames.bukkit.towny.db.TownySQLSource;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.VirtualContainer;
-import cz.neumimto.towny.townycolonies.model.VirtualInventory;
+import cz.neumimto.towny.townycolonies.model.VirtualContent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
@@ -80,7 +80,7 @@ public class Database {
             var gson = new Gson();
             Type containerType = new TypeToken<ArrayList<VirtualContainer>>() {
             }.getType();
-            Type invType = new TypeToken<ArrayList<VirtualInventory>>() {
+            Type invType = new TypeToken<ArrayList<VirtualContent>>() {
             }.getType();
 
 

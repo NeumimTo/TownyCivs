@@ -10,7 +10,9 @@ import org.bukkit.entity.Player;
 public class TownContext {
     public Town town;
     public Resident resident;
+
     public Player player;
+
     public Structure structure;
     public Location structureCenterLocation;
 

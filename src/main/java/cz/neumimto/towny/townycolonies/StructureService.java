@@ -11,6 +11,7 @@ import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
+import cz.neumimto.towny.townycolonies.model.VirtualContainer;
 import cz.neumimto.towny.townycolonies.schedulers.RegisterStructureCommand;
 import cz.neumimto.towny.townycolonies.schedulers.RemoveStructureCommand;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
@@ -167,6 +168,11 @@ public class StructureService {
                     if (a.editMode) {
                         managementService.structuresBeingEdited.add(a.uuid);
                     }
+                    if (a.containers != null) {
+                        for (VirtualContainer vc : a.containers) {
+                            managementService.registerManagedContainerBlock(vc);
+                        }
+                    }
                 })
                 .peek(a-> subclaimService.createRegion(a).ifPresent(b->subclaimService.registerRegion(b,a)))
                 .forEach(a -> {
@@ -188,6 +194,7 @@ public class StructureService {
         LoadedStructure l = region.loadedStructure;
         structures.remove(l.uuid);
         structureScheduler.addCommand(new RemoveStructureCommand(l));
+        managementService.removeManagedContainerBlock(region.loadedStructure);
         Town town = TownyAPI.getInstance().getTown(l.town);
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
     }

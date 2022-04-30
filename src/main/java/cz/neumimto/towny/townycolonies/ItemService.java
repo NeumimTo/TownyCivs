@@ -71,7 +71,18 @@ public class ItemService {
         return null;
     }
 
-    public static enum StructureTool {
+    /**
+     * Called from async
+     * @param key
+     * @param value
+     * @return
+     */
+    public ItemStack toItemStack(String key, Integer value) {
+        Material material = Material.matchMaterial(key);
+        return new ItemStack(material, value);
+    }
+
+    public enum StructureTool {
         EDIT_TOOL, TOWN_TOOL
     }
 }

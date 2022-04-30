@@ -20,6 +20,10 @@ public class ItemList implements Wrapper {
         @Optional
         public Integer customModelData;
 
+        @Path("Amount")
+        @Optional
+        public Integer amount;
+
         @Path("Fuel")
         @Optional
         public Integer fuel;

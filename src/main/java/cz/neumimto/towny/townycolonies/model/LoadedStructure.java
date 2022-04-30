@@ -4,7 +4,6 @@ import cz.neumimto.towny.townycolonies.config.Structure;
 import org.bukkit.Location;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +19,8 @@ public class LoadedStructure {
 
     public List<VirtualContainer> containers;
 
-    public List<VirtualInventory> storage;
+    public List<VirtualContent> storage;
+
     public long lastTickTime;
 
     public transient long nextTickTime;
@@ -44,7 +44,7 @@ public class LoadedStructure {
             }
         }
         if (storage != null) {
-            for (VirtualInventory c : storage) {
+            for (VirtualContent c : storage) {
                 l.storage.add(c.clone());
             }
         }

@@ -1,7 +1,7 @@
 package cz.neumimto.towny.townycolonies.mechanics;
 
 import cz.neumimto.towny.townycolonies.mechanics.common.ItemList;
-import cz.neumimto.towny.townycolonies.model.VirtualInventory;
+import cz.neumimto.towny.townycolonies.model.VirtualContent;
 
 import java.util.List;
 
@@ -9,12 +9,12 @@ public class ItemUpkeep implements Mechanic<ItemList> {
 
     @Override
     public boolean check(TownContext townContext, ItemList configContext) {
-        List<VirtualInventory> storage = townContext.loadedStructure.storage;
+        List<VirtualContent> storage = townContext.loadedStructure.storage;
         if (storage == null) {
             return false;
         }
-        for (VirtualInventory virtualInventory : storage) {
-            if (virtualInventory.content == null) {
+        for (VirtualContent virtualContent : storage) {
+            if (virtualContent.content == null) {
                 continue;
             }
 
@@ -22,11 +22,6 @@ public class ItemUpkeep implements Mechanic<ItemList> {
         return true;
     }
 
-
-    @Override
-    public void postAction(TownContext townContext, ItemList configContext) {
-        Mechanic.super.postAction(townContext, configContext);
-    }
 
     @Override
     public ItemList getNew() {
