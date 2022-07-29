@@ -20,13 +20,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class TownyColonies extends JavaPlugin {
-
-    public static String METADATA_KEY = "townycolonies-town-structures";
-
+    
     public static Logger logger;
 
     public static TownyColonies INSTANCE;
@@ -41,6 +40,14 @@ public final class TownyColonies extends JavaPlugin {
     public void onEnable() {
         TownyColonies.logger = getLogger();
         INSTANCE = this;
+        getLogger().info("""
+                  ______                          ______      __            _         \s
+                 /_  __/___ _      ______  __  __/ ____/___  / /___  ____  (_)__  _____
+                  / / / __ \\ | /| / / __ \\/ / / / /   / __ \\/ / __ \\/ __ \\/ / _ \\/ ___/
+                 / / / /_/ / |/ |/ / / / / /_/ / /___/ /_/ / / /_/ / / / / /  __(__  )\s
+                /_/  \\____/|__/|__/_/ /_/\\__, /\\____/\\____/_/\\____/_/ /_/_/\\___/____/ \s
+                                        /____/                                        \s
+                """);
         getLogger().info("TownyColonies starting");
 
         if (!reloading) {
@@ -93,7 +100,7 @@ public final class TownyColonies extends JavaPlugin {
 
         task = Bukkit.getScheduler().runTaskTimerAsynchronously(this,
                 injector.getInstance(StructureScheduler.class),
-                0L, 100);
+                0L, 20);
 
         reloading = true;
         getLogger().info("TownyColonies started");

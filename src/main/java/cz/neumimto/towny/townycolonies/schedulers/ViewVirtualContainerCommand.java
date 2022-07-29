@@ -2,11 +2,13 @@ package cz.neumimto.towny.townycolonies.schedulers;
 
 import cz.neumimto.towny.townycolonies.ItemService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.mechanics.VirtualItem;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.VirtualContainer;
 import cz.neumimto.towny.townycolonies.model.VirtualContent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -56,7 +58,7 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
         List<ItemStack> itemStacks = new ArrayList<>();
         ItemService itemService = TownyColonies.injector.getInstance(ItemService.class);
         for (Map.Entry<String, Integer> entry : content.entrySet()) {
-            ItemStack is = itemService.toItemStack(entry.getKey(), entry.getValue());
+            ItemStack is = VirtualItem.empty_slot.equals(entry.getKey()) ? new ItemStack(Material.AIR) : itemService.toItemStack(entry.getKey(), entry.getValue());
             itemStacks.add(is);
         }
         Bukkit.getScheduler().scheduleSyncDelayedTask(TownyColonies.INSTANCE, () -> {
@@ -64,6 +66,7 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
             for (ItemStack itemStack : itemStacks) {
                 inventory.addItem(itemStack);
             }
+            player.openInventory(inventory);
         });
     }
 }

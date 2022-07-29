@@ -37,7 +37,10 @@ public class VirtualContainer {
         v.z = z;
         v.full = full;
         v.world = world;
-        v.inputFilter.addAll(inputFilter);
+        v.inputFilter = new HashSet<>();
+        if (inputFilter != null) {
+            v.inputFilter.addAll(inputFilter);
+        }
         return v;
     }
 }

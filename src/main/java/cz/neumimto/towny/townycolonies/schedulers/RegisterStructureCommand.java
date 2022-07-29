@@ -18,8 +18,8 @@ public class RegisterStructureCommand extends ScheduledCommand {
     @Override
     public void executeFromAsyncThread(LoadedStructure loadedStructure) {
         Set<LoadedStructure> set = new HashSet<>();
-        set.add(loadedStructure);
-        TownyColonies.injector.getInstance(StructureScheduler.class).structuresByTown.merge(this.loadedStructure.uuid, set, (a,b) ->{
+        set.add(this.loadedStructure);
+        TownyColonies.injector.getInstance(StructureScheduler.class).structuresByTown.merge(this.loadedStructure.town, set, (a,b) ->{
             a.addAll(b);
             return a;
         });

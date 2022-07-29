@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies.schedulers;
 
 import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.db.Database;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 
 import java.util.Iterator;
@@ -29,6 +30,7 @@ public class RemoveStructureCommand extends ScheduledCommand {
             LoadedStructure next = iterator.next();
             if (next == this.loadedStructure) {
                 iterator.remove();
+                Database.scheduleRemove(this.loadedStructure);
                 break;
             }
         }

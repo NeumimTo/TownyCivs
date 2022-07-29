@@ -4,6 +4,7 @@ import cz.neumimto.towny.townycolonies.config.Structure;
 import org.bukkit.Location;
 
 import javax.annotation.concurrent.NotThreadSafe;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,11 +39,13 @@ public class LoadedStructure {
         l.town = town;
         l.center = center;
         l.structureId = structureId;
+        l.containers = new ArrayList<>();
         if (containers != null) {
             for (VirtualContainer c : containers) {
                 l.containers.add(c.clone());
             }
         }
+        l.storage = new ArrayList<>();
         if (storage != null) {
             for (VirtualContent c : storage) {
                 l.storage.add(c.clone());

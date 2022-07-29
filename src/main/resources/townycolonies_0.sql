@@ -1,7 +1,7 @@
 create table %prefix%townycolonies_version (
     version int not null
 );
-
+--split
 create table %prefix%townycolonies_structure (
     structure_uuid varchar(36) not null,
     town_uuid varchar(36) not null,
@@ -13,5 +13,5 @@ create table %prefix%townycolonies_structure (
     storage text,
     primary key(structure_uuid)
 );
-
+--split
 insert into %prefix%townycolonies_version values(1);

@@ -42,7 +42,9 @@ public class SubclaimService {
         if (structureById.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(createRegion(structureById.get(), structure.center));
+        Region region = createRegion(structureById.get(), structure.center);
+        region.loadedStructure = structure;
+        return Optional.of(region);
     }
 
     public Region createRegion(Structure def, Location center) {

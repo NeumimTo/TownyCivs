@@ -35,7 +35,7 @@ public class StructureScheduler implements Runnable {
 
     public void addCommand(ScheduledCommand command) {
         if (command.uuid == null) {
-             toRegister.offer(command);
+            toRegister.offer(command);
         } else {
             Queue<ScheduledCommand> scheduledCommands = taskQueue.get(command.uuid);
             if (scheduledCommands == null) {

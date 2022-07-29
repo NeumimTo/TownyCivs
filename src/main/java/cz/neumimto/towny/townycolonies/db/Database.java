@@ -41,13 +41,16 @@ public class Database {
         int dbSchema = schemaVersion();
         while (dbSchema != currentSchema) {
             TownyColonies.logger.info("Updating db schema to ver." + dbSchema);
-            String query = queryFromFile("townycolonies_" + dbSchema + ".sql");
-            TownyColonies.logger.info(query);
-            TownySQLSource sqlSource = (TownySQLSource) dataSource;
-            try (var stmt = sqlSource.getHikariDataSource().getConnection().prepareStatement(query)) {
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            String queries = queryFromFile("townycolonies_" + dbSchema + ".sql");
+            String[] split = queries.split("--split");
+            for (String query : split) {
+                TownyColonies.logger.info(query);
+                TownySQLSource sqlSource = (TownySQLSource) dataSource;
+                try (var stmt = sqlSource.getHikariDataSource().getConnection().prepareStatement(query)) {
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
             dbSchema++;
         }
@@ -151,8 +154,26 @@ public class Database {
         }
     }
 
+    public static void remove(UUID uuid) {
+        try {
+            TownyColonies.logger.info("Removing Structure " + uuid);
+            String sql = queryFromFile("townycolonies_delete.sql");
+            ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getContext();
+            Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
+            try (var stmt = connection.prepareStatement(sql)){
+                stmt.setString(1, uuid.toString());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void scheduleSave(LoadedStructure structure) {
         LoadedStructure clone = structure.clone();
         Bukkit.getScheduler().runTaskAsynchronously(TownyColonies.INSTANCE, () -> save(clone));
+    }
+
+    public static void scheduleRemove(LoadedStructure structure) {
+        Bukkit.getScheduler().runTaskAsynchronously(TownyColonies.INSTANCE, () -> remove(structure.uuid));
     }
 }

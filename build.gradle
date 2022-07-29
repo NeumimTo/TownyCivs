@@ -1,6 +1,8 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'java'
+    id("xyz.jpenilla.run-paper") version "1.0.6"
+
 }
 
 group = 'cz.neumimto.towny'
@@ -77,10 +79,14 @@ processResources {
 }
 
 shadowJar {
-    relocate 'com.electronwill', 'townycolonies.com.electronwill'
+    relocate 'com.electronwill', 'com.electronwill'
     relocate 'com.typesafe', 'com.typesafe'
-    relocate 'com.github.stefvanschie', 'townycolonies.com.github.stefvanschie'
-    relocate 'com.google.inject', 'townycolonies.com.google.inject'
-    relocate 'co.aikar.commands', 'townycolonies.acf'
-    relocate 'co.aikar.locales', 'townycolonies.locales'
+    relocate 'com.github.stefvanschie', 'com.github.stefvanschie'
+    relocate 'com.google.inject', 'com.google.inject'
+    relocate 'co.aikar.commands', 'co.aikar.commands'
+    relocate 'co.aikar.locales', 'co.aikar.locales'
+}
+
+runServer {
+    minecraftVersion("1.18.2")
 }

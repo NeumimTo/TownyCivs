@@ -23,6 +23,7 @@ import org.bukkit.entity.Player;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Singleton
 public class ManagementService {
@@ -210,6 +211,8 @@ public class ManagementService {
         Collection<Material> materials = Materials.getMaterials("tc:container");
         Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
         Map<VirtualContainer, VirtualContent> inv = VirtualStorageHelper.prepareVirtualinventory(lreg, map);
+        loadedStructure.containers = new ArrayList<>();
+        loadedStructure.storage = new ArrayList<>();
         for (Map.Entry<VirtualContainer, VirtualContent> entry : inv.entrySet()) {
             loadedStructure.containers.add(entry.getKey());
             loadedStructure.storage.add(entry.getValue());
