@@ -1,7 +1,10 @@
+import java.nio.file.Files
+
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2'
     id 'java'
     id("xyz.jpenilla.run-paper") version "1.0.6"
+    id "de.undercouch.download" version "5.1.0"
 
 }
 
@@ -45,11 +48,11 @@ dependencies {
     compileOnly 'com.palmergames.bukkit.towny:towny:0.98.1.0'
     implementation 'com.electronwill.night-config:hocon:3.6.5'
     implementation 'com.google.inject:guice:5.1.0'
-    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.5'
+    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.6'
     implementation "co.aikar:acf-paper:0.5.1-SNAPSHOT"
     implementation 'net.kyori:adventure-text-minimessage:4.10.1'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testImplementation 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
 }
 
@@ -90,3 +93,43 @@ shadowJar {
 runServer {
     minecraftVersion("1.18.2")
 }
+
+java.nio.file.Path pluginsDir;
+
+task preparePluginsDir {
+    pluginsDir = rootDir.toPath().resolve("run/plugins/");
+    if (!Files.exists(pluginsDir)) {
+        Files.createDirectories(pluginsDir)
+    }
+}
+
+task dlPlugins {
+    var pluginsFileDir = pluginsDir.toFile();
+    download.run {
+        src "https://www.spigotmc.org/resources/vault.34315/download?version=344916"
+        dest new File(pluginsFileDir, "Vault.jar")
+        overwrite true
+    }
+    download.run {
+        src "https://www.spigotmc.org/resources/the-new-economy.7805/download?version=431948"
+        dest new File(pluginsFileDir, "TNE.jar")
+        overwrite true
+    }
+    download.run {
+        src "https://github.com/TownyAdvanced/Towny/releases/download/0.98.3.0/Towny.Advanced.0.98.3.0.zip"
+        dest new File(new File(System.getProperty("java.io.tmpdir")), "Towny.zip")
+        overwrite true
+    }
+
+    copy {
+        from {
+            var path = System.getProperty("java.io.tmpdir") + "/Towny.zip"
+            zipTree(path).matching { include '**/*.jar' }.files
+        }
+        into pluginsDir.toFile()
+    }
+
+    dependsOn preparePluginsDir
+}
+
+

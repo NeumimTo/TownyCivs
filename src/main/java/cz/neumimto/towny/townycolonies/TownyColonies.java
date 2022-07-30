@@ -41,6 +41,7 @@ public final class TownyColonies extends JavaPlugin {
         TownyColonies.logger = getLogger();
         INSTANCE = this;
         getLogger().info("""
+                  
                   ______                          ______      __            _         \s
                  /_  __/___ _      ______  __  __/ ____/___  / /___  ____  (_)__  _____
                   / / / __ \\ | /| / / __ \\/ / / / /   / __ \\/ / __ \\/ __ \\/ / _ \\/ ___/
