@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies.schedulers;
 
 import cz.neumimto.towny.townycolonies.ItemService;
+import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.mechanics.VirtualItem;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
@@ -24,7 +25,11 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
 
     private Location realContainer;
 
-    private static Map<Inventory, VirtualContent> openedInventories = new HashMap<>();
+    record InvData(VirtualContent virtualContent, LoadedStructure loadedStructure){
+
+    }
+
+    private static Map<Inventory, InvData> openedInventories = new HashMap<>();
 
     public ViewVirtualContainerCommand(UUID uuid, UUID container, Player player, Location realContainer) {
         super(uuid);
@@ -39,7 +44,7 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
             return;
         }
 
-        Map<String, Integer> content = new HashMap<>();
+        List<VirtualItem> content = new ArrayList<>();
         int x = realContainer.getBlockX();
         int y = realContainer.getBlockY();
         int z = realContainer.getBlockZ();
@@ -65,10 +70,15 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
 
         List<ItemStack> itemStacks = new ArrayList<>();
         ItemService itemService = TownyColonies.injector.getInstance(ItemService.class);
-        for (Map.Entry<String, Integer> entry : content.entrySet()) {
-            ItemStack is = VirtualItem.empty_slot.equals(entry.getKey()) ? new ItemStack(Material.AIR) : itemService.toItemStack(entry.getKey(), entry.getValue());
-            itemStacks.add(is);
+
+        for (VirtualItem virtualItem : content) {
+            if (virtualItem.data.equals(VirtualItem.empty_slot.data)) {
+                itemStacks.add(new ItemStack(Material.AIR));
+            } else {
+                itemStacks.add(virtualItem.toItemStack());
+            }
         }
+
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(TownyColonies.INSTANCE, () -> {
             Inventory inventory = Bukkit.createInventory(null, InventoryType.BARREL, loadedStructure.structureDef.name);
@@ -76,25 +86,33 @@ public class ViewVirtualContainerCommand extends ScheduledCommand {
                 inventory.addItem(itemStack);
             }
             player.openInventory(inventory);
-            openedInventories.put(inventory, fVirtualContent);
+            openedInventories.put(inventory, new InvData(fVirtualContent, loadedStructure));
         });
     }
 
     public static void handleInventoryClose(InventoryCloseEvent event) {
         Inventory inventory = event.getInventory();
-        VirtualContent virtualInventory = openedInventories.get(inventory);
-        if (virtualInventory == null) {
+        InvData invData = openedInventories.get(inventory);
+        if (invData == null) {
             return;
         }
 
+        final List<VirtualItem> items = new ArrayList<>();
+
         for (ItemStack itemStack : event.getInventory()) {
-            itemStack.
+            VirtualItem serialized = VirtualItem.toVirtualItem(itemStack);
+            items.add(serialized);
         }
 
-        virtualInventory.content.
-        TownyColonies.injector.getInstance(ItemService.class);
-
+        inventory.clear();
         openedInventories.remove(inventory);
+
+        if (TownyColonies.INSTANCE.structureService.findStructureByUUID(invData.loadedStructure.uuid).isEmpty()) {
+            return;
+        }
+
+        var command = new VirtualInventoryUpdateCommand(invData.loadedStructure,invData.virtualContent.containerUUID,items);
+        TownyColonies.INSTANCE.structureScheduler.addCommand(command);
     }
 
 }

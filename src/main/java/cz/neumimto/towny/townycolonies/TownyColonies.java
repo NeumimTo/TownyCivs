@@ -5,6 +5,7 @@ import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.file.FileConfig;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
@@ -13,9 +14,12 @@ import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class TownyColonies extends JavaPlugin {
-    
+
     public static Logger logger;
 
     public static TownyColonies INSTANCE;
@@ -35,6 +39,30 @@ public final class TownyColonies extends JavaPlugin {
     private static BukkitTask task;
 
     public boolean reloading;
+
+    @Inject
+    public ConfigurationService configurationService;
+
+    @Inject
+    public StructureScheduler structureScheduler;
+
+    @Inject
+    public StructureService structureService;
+
+    @Inject
+    public MechanicService mechanicService;
+
+    @Inject
+    private ItemService itemService;
+
+    public TownyColonies() {
+        super();
+    }
+
+    protected TownyColonies(JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+        super(loader, description, dataFolder, file);
+    }
+
 
     @Override
     public void onEnable() {
@@ -63,6 +91,8 @@ public final class TownyColonies extends JavaPlugin {
                 }
             });
         }
+
+        injector.injectMembers(this);
 
         injector.getInstance(MechanicService.class).registerDefaults();
         ConfigurationService configurationService = injector.getInstance(ConfigurationService.class);
@@ -106,6 +136,8 @@ public final class TownyColonies extends JavaPlugin {
         reloading = true;
         getLogger().info("TownyColonies started");
     }
+
+
 
     @Override
     public void onDisable() {

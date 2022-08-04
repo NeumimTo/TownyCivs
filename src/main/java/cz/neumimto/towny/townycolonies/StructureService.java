@@ -53,10 +53,6 @@ public class StructureService {
         return structures.values().stream().filter(a->a.town.equals(town.getUUID())).collect(Collectors.toSet());
     }
 
-    public void isValidLocation(Structure structure, Location location) {
-
-    }
-
     public ItemStack toItemStack(Structure structure, int count) {
         ItemStack itemStack = new ItemStack(structure.material);
         ItemMeta itemMeta = itemStack.getItemMeta();
@@ -199,4 +195,7 @@ public class StructureService {
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
     }
 
+    public Optional<LoadedStructure> findStructureByUUID(UUID uuid) {
+        return Optional.ofNullable(structures.get(uuid));
+    }
 }
