@@ -106,12 +106,12 @@ task preparePluginsDir {
 task dlPlugins {
     var pluginsFileDir = pluginsDir.toFile();
     download.run {
-        src "https://www.spigotmc.org/resources/vault.34315/download?version=344916"
+        src "https://github.com/MilkBowl/Vault/releases/download/1.7.3/Vault.jar"
         dest new File(pluginsFileDir, "Vault.jar")
         overwrite true
     }
     download.run {
-        src "https://www.spigotmc.org/resources/the-new-economy.7805/download?version=431948"
+        src "https://github.com/TheNewEconomy/TNE-Bukkit/releases/download/TNE-0.1.1.16/TNE-0.1.1.16.jar"
         dest new File(pluginsFileDir, "TNE.jar")
         overwrite true
     }
@@ -131,5 +131,3 @@ task dlPlugins {
 
     dependsOn preparePluginsDir
 }
-
-

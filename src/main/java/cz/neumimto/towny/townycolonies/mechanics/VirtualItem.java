@@ -21,6 +21,10 @@ public class VirtualItem {
         return result;
     }
 
+    public static String toVirtualItem(ItemStack itemStack) {
+        
+    }
+
     public static String toVirtualItemFilter(ItemStack item) {
         String result = item.getType().getKey().getKey();
         if (item.hasItemMeta()) {
