@@ -32,7 +32,7 @@ public class VirtualItemProduction implements Mechanic<ItemList> {
                     }
 
                     if (container.inputFilter != null) {
-                        boolean consumes = container.inputFilter.stream().anyMatch(a->a.equals(item));
+                        boolean consumes = container.inputFilter.isEmpty() || container.inputFilter.stream().anyMatch(a->a.equals(item));
                         if (consumes) {
                             virtualContainer = container;
 
@@ -40,30 +40,30 @@ public class VirtualItemProduction implements Mechanic<ItemList> {
                             int maxStackSize = material.getMaxStackSize();
                             for (VirtualItem entry : virtualContent.content) {
 
-                               // if (entry.getKey().equals(VirtualItem.empty_slot)) {
-                               //     while (amount != 0) {
-                               //         //todo use iterator and remove the key
-                               //         entry.setValue(entry.getValue() + 1);
-                               //         if (entry.getValue() == maxStackSize) {
-                               //             continue;
-                               //         }
-                               //         amount=-1;
-                               //     }
-                               //     continue;
-                               // }
-//
-                               // if (entry.getKey().equals(item)) {
-                               //     if (entry.getValue() == maxStackSize) {
-                               //         continue;
-                               //     }
-                               //     while (amount != 0) {
-                               //         entry.setValue(entry.getValue() + 1);
-                               //         if (entry.getValue() == maxStackSize) {
-                               //             continue;
-                               //         }
-                               //         amount=-1;
-                               //     }
-                               // }
+                                //if (entry.getKey().equals(VirtualItem.empty_slot)) {
+                                //    while (amount != 0) {
+                                //        //todo use iterator and remove the key
+                                //        entry.setValue(entry.getValue() + 1);
+                                //        if (entry.getValue() == maxStackSize) {
+                                //            continue;
+                                //        }
+                                //        amount=-1;
+                                //    }
+                                //    continue;
+                                //}
+                                //
+                                //if (entry.getKey().equals(item)) {
+                                //    if (entry.getValue() == maxStackSize) {
+                                //        continue;
+                                //    }
+                                //    while (amount != 0) {
+                                //        entry.setValue(entry.getValue() + 1);
+                                //        if (entry.getValue() == maxStackSize) {
+                                //            continue;
+                                //        }
+                                //        amount=-1;
+                                //    }
+                                //}
 
                             }
                         }
