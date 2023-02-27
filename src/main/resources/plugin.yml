@@ -4,3 +4,7 @@ main: cz.neumimto.towny.townycolonies.TownyColonies
 api-version: 1.18
 depend: [ Towny ]
 authors: [ NeumimTo ]
+libraries:
+    - 'com.electronwill.night-config:hocon:3.6.6'
+    - 'com.electronwill.night-config:core:3.6.6'
+    - 'com.google.inject:guice:5.1.0'
