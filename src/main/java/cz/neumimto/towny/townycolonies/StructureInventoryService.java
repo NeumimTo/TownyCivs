@@ -85,4 +85,8 @@ public class StructureInventoryService {
         structureInventory.addItem(itemStacks);
         structsAndInv.put(structure.uuid, structureInventory);
     }
+
+    public UUID getPlayerViewingInventory(LoadedStructure structure) {
+        return structsAndPlayers.get(structure.uuid);
+    }
 }

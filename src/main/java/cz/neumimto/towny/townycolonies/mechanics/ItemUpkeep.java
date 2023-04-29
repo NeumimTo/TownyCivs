@@ -1,24 +1,25 @@
 package cz.neumimto.towny.townycolonies.mechanics;
 
+import cz.neumimto.towny.townycolonies.StructureInventoryService;
+import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.mechanics.common.ItemList;
-import cz.neumimto.towny.townycolonies.model.VirtualContent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ItemUpkeep implements Mechanic<ItemList> {
 
     @Override
     public boolean check(TownContext townContext, ItemList configContext) {
-        List<VirtualContent> storage = townContext.loadedStructure.storage;
-        if (storage == null) {
-            return false;
-        }
-        for (VirtualContent virtualContent : storage) {
-            if (virtualContent.content == null) {
-                continue;
-            }
 
-        }
+        Set<ItemStack> upkeep = configContext.configItems.stream().map(ItemList.ConfigItem::toItemStack).collect(Collectors.toSet());
+
+        TownyColonies.injector.getInstance(StructureInventoryService.class)
+                .addItemProduction(townContext.town, townContext.loadedStructure, upkeep);
+
+
         return true;
     }
 

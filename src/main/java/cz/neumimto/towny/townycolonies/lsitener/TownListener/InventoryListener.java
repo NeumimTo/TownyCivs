@@ -34,6 +34,6 @@ public class InventoryListener implements Listener {
 
     @EventHandler
     public void onInventoryOpen(EntityInteractEvent event) {
-        ss.save();
+        ;
     }
 }

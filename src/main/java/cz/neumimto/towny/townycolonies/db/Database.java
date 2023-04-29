@@ -8,7 +8,6 @@ import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.db.TownySQLSource;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
-import cz.neumimto.towny.townycolonies.model.VirtualContent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 

@@ -22,16 +22,7 @@ public class ItemProduction implements Mechanic<ItemList> {
 
         Set<ItemStack> itemStackSet = new HashSet<>();
         for (ItemList.ConfigItem configItem : configContext.configItems) {
-            ItemStack itemStack = new ItemStack(Material.matchMaterial(configItem.material), configItem.amount);
-
-            itemStack.editMeta(itemMeta -> {
-                if (configItem.customModelData != null) {
-                    itemMeta.setCustomModelData(configItem.customModelData);
-                }
-                if (configItem.customName != null) {
-                    itemMeta.displayName(MiniMessage.miniMessage().deserialize(configItem.customName));
-                }
-            });
+            ItemStack itemStack = configItem.toItemStack();
             itemStackSet.add(itemStack);
         }
 
