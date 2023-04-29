@@ -1,8 +1,6 @@
 package cz.neumimto.towny.townycolonies;
 
 import co.aikar.commands.PaperCommandManager;
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.file.FileConfig;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -12,19 +10,23 @@ import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
-import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
+import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
+import space.arim.morepaperlib.MorePaperLib;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +46,7 @@ public final class TownyColonies extends JavaPlugin {
     public ConfigurationService configurationService;
 
     @Inject
-    public StructureScheduler structureScheduler;
+    public FolliaScheduler structureScheduler;
 
     @Inject
     public StructureService structureService;
@@ -54,6 +56,8 @@ public final class TownyColonies extends JavaPlugin {
 
     @Inject
     private ItemService itemService;
+
+    public static MorePaperLib MORE_PAPER_LIB;
 
     public TownyColonies() {
         super();
@@ -68,6 +72,7 @@ public final class TownyColonies extends JavaPlugin {
     public void onEnable() {
         TownyColonies.logger = getLogger();
         INSTANCE = this;
+        MORE_PAPER_LIB = new MorePaperLib(this);
         getLogger().info("""
                   
                   ______                          ______      __            _         \s
@@ -84,7 +89,7 @@ public final class TownyColonies extends JavaPlugin {
                 @Override
                 protected void configure() {
                     bind(ConfigurationService.class);
-                    bind(StructureScheduler.class);
+                    bind(FolliaScheduler.class);
                     bind(StructureService.class);
                     bind(MechanicService.class);
                     bind(ItemService.class);
@@ -129,9 +134,11 @@ public final class TownyColonies extends JavaPlugin {
             task.cancel();
         }
 
-        task = Bukkit.getScheduler().runTaskTimerAsynchronously(this,
-                injector.getInstance(StructureScheduler.class),
-                0L, 20);
+        MORE_PAPER_LIB.scheduling().asyncScheduler().runAtFixedRate(
+                injector.getInstance(FolliaScheduler.class),
+                Duration.ZERO,
+                Duration.of(1, ChronoUnit.SECONDS));
+
 
         reloading = true;
         getLogger().info("TownyColonies started");

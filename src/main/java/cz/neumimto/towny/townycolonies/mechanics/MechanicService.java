@@ -44,12 +44,12 @@ public class MechanicService {
         prodReq("town_upkeep", new Price());
 
         placeReq("y_bellow", new YBellow());
-        placeReq("y_above", new YBellow());
+        placeReq("y_above", new YAbove());
         placeReq("world", new WorldReq());
         placeReq("town_level", new TownRank());
         placeReq("structure", injector.getInstance(MStructure.class));
 
-        prodMech("virtual_item", new VirtualItemProduction());
+        prodMech("item", new ItemProduction());
 
         Bukkit.getPluginManager().callEvent(new RegisterMechanicEvent(this));
     }
@@ -70,7 +70,7 @@ public class MechanicService {
         placeReq.put(name.toLowerCase(Locale.ROOT), mech);
     }
 
-    public void prodMech(String name, VirtualItemProduction virtualItemProduction) {
+    public void prodMech(String name, ItemProduction virtualItemProduction) {
         prodMech.put(name.toLowerCase(Locale.ROOT), virtualItemProduction);
     }
 

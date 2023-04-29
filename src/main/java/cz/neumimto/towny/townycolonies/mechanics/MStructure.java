@@ -12,9 +12,10 @@ class MStructure implements Mechanic<StringWrapper> {
 
     @Override
     public boolean check(TownContext townContext, StringWrapper configContext) {
-        return structureService.getAllStructures()
+        return structureService.getAllStructuresByTown()
+                .values()
                 .stream()
-                .anyMatch(a -> a.structureDef.id.contains(configContext.value));
+                .anyMatch(a -> a.stream().anyMatch(l->l.structureId.contains(configContext.value)));
     }
 
     @Override

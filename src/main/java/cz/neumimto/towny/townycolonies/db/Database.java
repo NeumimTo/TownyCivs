@@ -8,7 +8,6 @@ import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.db.TownySQLSource;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
-import cz.neumimto.towny.townycolonies.model.VirtualContainer;
 import cz.neumimto.towny.townycolonies.model.VirtualContent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,8 +18,8 @@ import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
-
 
 public class Database {
 
@@ -29,6 +28,9 @@ public class Database {
     private static String prefix;
 
     private static Gson gson = new Gson();
+
+    private static String all_structures_sql;
+    private static String save_sql;
 
     public static void init() {
         prefix = TownySettings.getSQLTablePrefix().toUpperCase();
@@ -54,6 +56,8 @@ public class Database {
             }
             dbSchema++;
         }
+        save_sql = queryFromFile("townycolonies_insert.sql");
+        all_structures_sql = queryFromFile("townycolonies_all_structures.sql");
     }
 
     private static int schemaVersion() {
@@ -79,13 +83,7 @@ public class Database {
         try {
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
 
-            String qry = queryFromFile("townycolonies_all_structures.sql");
-            var gson = new Gson();
-            Type containerType = new TypeToken<ArrayList<VirtualContainer>>() {
-            }.getType();
-            Type invType = new TypeToken<ArrayList<VirtualContent>>() {
-            }.getType();
-
+            String qry = all_structures_sql;
 
             try (var statement = connection.prepareStatement(qry)) {
                 try (var rs = statement.executeQuery()) {
@@ -97,15 +95,7 @@ public class Database {
                         ls.structureId = rs.getString("structure_id");
                         String[] center = rs.getString("center").split(";");
                         ls.center = new Location(Bukkit.getWorld(center[0]),Integer.parseInt(center[1]),Integer.parseInt(center[2]),Integer.parseInt(center[3]));
-                        ls.editMode = rs.getBoolean("edit_mode");
-                        String containers = rs.getString("containers");
-                        if (containers != null) {
-                            ls.containers = gson.fromJson(containers, containerType);
-                        }
-                        String storage = rs.getString("storage");
-                        if (storage != null) {
-                            ls.storage = gson.fromJson(containers, invType);
-                        }
+                        ls.editMode = new AtomicBoolean(rs.getBoolean("edit_mode"));
                         set.add(ls);
                     }
                 }
@@ -134,7 +124,7 @@ public class Database {
     public static void save(LoadedStructure structure) {
         try {
             TownyColonies.logger.info("Saving structure " + structure.uuid);
-            String sql = queryFromFile("townycolonies_insert.sql");
+            String sql = save_sql;
             ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getContext();
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
             try (var stmt = connection.prepareStatement(sql)) {
@@ -144,9 +134,7 @@ public class Database {
                 stmt.setString(4, structure.structureId); //"structure_id"
                 Location center = structure.center;
                 stmt.setString(5, center.getWorld().getName()+";"+center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
-                stmt.setString(6, structure.containers == null ? null : gson.toJson(structure.containers)); //"containers"
-                stmt.setBoolean(7, structure.editMode); //"edit_mode"
-                stmt.setString(8, structure.storage == null ? null : gson.toJson(structure.storage)); //"storage"
+                stmt.setBoolean(7, structure.editMode.get()); //"edit_mode"
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -170,6 +158,7 @@ public class Database {
 
     public static void scheduleSave(LoadedStructure structure) {
         LoadedStructure clone = structure.clone();
+
         Bukkit.getScheduler().runTaskAsynchronously(TownyColonies.INSTANCE, () -> save(clone));
     }
 

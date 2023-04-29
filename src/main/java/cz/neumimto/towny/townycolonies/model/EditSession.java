@@ -19,5 +19,6 @@ public class EditSession {
     public EditSession(Structure structure, Location location) {
         this.uuid = UUID.randomUUID();
         this.center = location;
+        this.structure = structure;
     }
 }

@@ -1,16 +1,12 @@
 package cz.neumimto.towny.townycolonies;
 
-import com.github.stefvanschie.inventoryframework.HumanEntityCache;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
-import cz.neumimto.towny.townycolonies.lsitener.TownListener.VirtualStorageHelper;
 import cz.neumimto.towny.townycolonies.model.*;
-import cz.neumimto.towny.townycolonies.schedulers.SetEditModeCommand;
-import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
-import cz.neumimto.towny.townycolonies.schedulers.ViewVirtualContainerCommand;
+import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +19,7 @@ import org.bukkit.entity.Player;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class ManagementService {
@@ -44,8 +40,7 @@ public class ManagementService {
     private ConfigurationService configurationService;
 
     @Inject
-    private StructureScheduler structureScheduler;
-    private Map<Location, UUID> managedContainerBlocks = new HashMap<>();
+    private FolliaScheduler structureScheduler;
 
 
     public EditSession startNewEditSession(Player player, Structure structure, Location location) {
@@ -204,21 +199,12 @@ public class ManagementService {
 
         loadedStructure.town = town.getUUID();
         loadedStructure.structureDef = structure;
-        loadedStructure.editMode = true;
+        loadedStructure.editMode = new AtomicBoolean(true);
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
 
         Collection<Material> materials = Materials.getMaterials("tc:container");
         Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
-        Map<VirtualContainer, VirtualContent> inv = VirtualStorageHelper.prepareVirtualinventory(lreg, map);
-        loadedStructure.containers = new ArrayList<>();
-        loadedStructure.storage = new ArrayList<>();
-        for (Map.Entry<VirtualContainer, VirtualContent> entry : inv.entrySet()) {
-            loadedStructure.containers.add(entry.getKey());
-            loadedStructure.storage.add(entry.getValue());
-            registerManagedContainerBlock(entry.getKey());
-        }
-
 
         subclaimService.registerRegion(lreg, loadedStructure);
 
@@ -228,10 +214,6 @@ public class ManagementService {
         structureService.save(loadedStructure);
     }
 
-    public void registerManagedContainerBlock(VirtualContainer key) {
-        managedContainerBlocks.put(new Location(Bukkit.getServer().getWorld(key.world), key.x, key.y, key.z), key.id);
-    }
-
     public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
         Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
 
@@ -239,7 +221,7 @@ public class ManagementService {
             structuresBeingEdited.add(loadedStructure.uuid);
             TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " put " + loadedStructure.structureDef.name +  " into edit mode ");
 
-            structureScheduler.addCommand(new SetEditModeCommand(loadedStructure.uuid, true));
+            loadedStructure.editMode.set(true);
 
         } else {
 
@@ -247,8 +229,8 @@ public class ManagementService {
             Map<String, Integer> remainingBlocks = subclaimService.remainingBlocks(region);
             if (subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
                 structuresBeingEdited.remove(loadedStructure.uuid);
+                loadedStructure.editMode.set(false);
 
-                structureScheduler.addCommand(new SetEditModeCommand(loadedStructure.uuid, false));
             } else {
                 MiniMessage miniMessage = MiniMessage.miniMessage();
                 player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" +loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
@@ -267,21 +249,5 @@ public class ManagementService {
             map.put(location, data);
         }
         player.sendMultiBlockChange(map, false);
-    }
-    public void openVirtualContainer(LoadedStructure loadedStructure, UUID container, Location location, Player player) {
-        UUID uuid = contaienrs.get(location);
-        structureScheduler.addCommand(new ViewVirtualContainerCommand(loadedStructure.uuid, uuid, player, location.clone()));
-    }
-
-    public UUID getVirtualContainer(Location location) {
-        return managedContainerBlocks.get(location);
-    }
-
-    public void removeManagedContainerBlock(LoadedStructure loadedStructure) {
-        if (loadedStructure.containers != null) {
-            for (VirtualContainer key : loadedStructure.containers) {
-                managedContainerBlocks.remove(new Location(Bukkit.getServer().getWorld(key.world), key.x, key.y, key.z));
-            }
-        }
     }
 }

@@ -15,7 +15,7 @@ repositories {
     mavenCentral()
     maven {
         name = 'papermc-repo'
-        url = 'https://papermc.io/repo/repository/maven-public/'
+        url = 'https://repo.papermc.io/repository/maven-public/'
     }
     maven {
         name = 'sonatype'
@@ -31,6 +31,9 @@ repositories {
     maven {
         url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
     }
+    maven {
+        url = "https://mvn-repo.arim.space/lesser-gpl3/"
+    }
 }
 
 compileJava {
@@ -44,17 +47,19 @@ test {
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
+    compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
     compileOnly 'com.palmergames.bukkit.towny:towny:0.98.1.0'
     compileOnly 'com.electronwill.night-config:hocon:3.6.5'
     compileOnly 'com.google.inject:guice:5.1.0'
     implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.8'
     implementation "co.aikar:acf-paper:0.5.1-SNAPSHOT"
     implementation 'net.kyori:adventure-text-minimessage:4.10.1'
+    implementation 'space.arim.morepaperlib:morepaperlib:0.4.2'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testImplementation 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
     testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:2.29.0'
+
 
 }
 

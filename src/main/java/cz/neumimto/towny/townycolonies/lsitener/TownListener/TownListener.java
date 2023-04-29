@@ -71,25 +71,6 @@ public class TownListener implements Listener {
         Player player = event.getPlayer();
         ItemService.StructureTool itemType = itemService.getItemType(event.getItem());
 
-        if (event.getClickedBlock() != null) {
-            Material type = event.getClickedBlock().getType();
-            if (type == Material.BARREL || type == Material.CHEST || type == Material.TRAPPED_CHEST) {
-                Location location = event.getClickedBlock().getLocation();
-                UUID id = managementService.getVirtualContainer(location);
-                if (id != null) {
-                    Optional<Region> structureAt = subclaimService.regionAt(location);
-                    if (structureAt.isPresent()) {
-                        Region region = structureAt.get();
-                        if (!managementService.isBeingEdited(region.loadedStructure)) {
-                            managementService.openVirtualContainer(region.loadedStructure, id, location, event.getPlayer());
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
         if (player.hasPermission(Permissions.ROLE_TOWN_ADMINISTRATIVE) && itemType == ItemService.StructureTool.TOWN_TOOL) {
             event.setCancelled(true);
             handleTownBlookInteraction(player);

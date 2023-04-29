@@ -11,13 +11,9 @@ import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.model.StructureAndCount;
-import cz.neumimto.towny.townycolonies.model.VirtualContainer;
-import cz.neumimto.towny.townycolonies.schedulers.RegisterStructureCommand;
-import cz.neumimto.towny.townycolonies.schedulers.RemoveStructureCommand;
-import cz.neumimto.towny.townycolonies.schedulers.StructureScheduler;
+import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -25,12 +21,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Singleton
 public class StructureService {
 
-    private Map<UUID, LoadedStructure> structures = new HashMap<>();
+    private Map<UUID, LoadedStructure> structures = new ConcurrentHashMap<>();
+    private Map<UUID, Set<LoadedStructure>> structuresByTown = new ConcurrentHashMap<>();
 
     @Inject
     private ConfigurationService configurationService;
@@ -39,13 +37,14 @@ public class StructureService {
     private SubclaimService subclaimService;
 
     @Inject
-    private StructureScheduler structureScheduler;
+    private FolliaScheduler structureScheduler;
 
     @Inject
     private ManagementService managementService;
 
-    public Collection<LoadedStructure> getAllStructures() {
-        return structures.values();
+
+    public Map<UUID, Set<LoadedStructure>> getAllStructuresByTown() {
+        return structuresByTown;
     }
 
 
@@ -147,8 +146,16 @@ public class StructureService {
 
     public void addToTown(Town town, LoadedStructure loadedStructure) {
         structures.put(loadedStructure.uuid, loadedStructure);
+
+        Set<LoadedStructure> set = ConcurrentHashMap.newKeySet();
+        set.add(loadedStructure);
+
+        structuresByTown.merge(loadedStructure.town, set, (a,b) ->{
+            a.addAll(b);
+            return a;
+        });
+
         loadedStructure.town = town.getUUID();
-        structureScheduler.addCommand(new RegisterStructureCommand(loadedStructure));
     }
 
     public void loadAll() {
@@ -161,13 +168,8 @@ public class StructureService {
                 .filter(a -> a.structureDef != null)
                 .filter(a->towns.contains(a.town))
                 .peek(a -> {
-                    if (a.editMode) {
+                    if (a.editMode.get()) {
                         managementService.structuresBeingEdited.add(a.uuid);
-                    }
-                    if (a.containers != null) {
-                        for (VirtualContainer vc : a.containers) {
-                            managementService.registerManagedContainerBlock(vc);
-                        }
                     }
                 })
                 .peek(a-> subclaimService.createRegion(a).ifPresent(b->subclaimService.registerRegion(b,a)))
@@ -189,10 +191,13 @@ public class StructureService {
         subclaimService.delete(region);
         LoadedStructure l = region.loadedStructure;
         structures.remove(l.uuid);
-        structureScheduler.addCommand(new RemoveStructureCommand(l));
-        managementService.removeManagedContainerBlock(region.loadedStructure);
+        Set<LoadedStructure> loadedStructures = structuresByTown.getOrDefault(l.town, Collections.emptySet());
+        loadedStructures.remove(l);
         Town town = TownyAPI.getInstance().getTown(l.town);
+
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
+
+        Database.scheduleRemove(l);
     }
 
     public Optional<LoadedStructure> findStructureByUUID(UUID uuid) {
