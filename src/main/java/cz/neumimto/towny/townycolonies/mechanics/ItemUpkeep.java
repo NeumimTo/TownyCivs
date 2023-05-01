@@ -17,7 +17,7 @@ public class ItemUpkeep implements Mechanic<ItemList> {
         Set<ItemStack> upkeep = configContext.configItems.stream().map(ItemList.ConfigItem::toItemStack).collect(Collectors.toSet());
 
         TownyColonies.injector.getInstance(StructureInventoryService.class)
-                .addItemProduction(townContext.town, townContext.loadedStructure, upkeep);
+                .upkeep(townContext.town, townContext.loadedStructure, upkeep);
 
 
         return true;

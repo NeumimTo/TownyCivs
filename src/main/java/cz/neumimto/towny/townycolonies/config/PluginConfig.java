@@ -1,16 +1,8 @@
 package cz.neumimto.towny.townycolonies.config;
 
-import com.electronwill.nightconfig.core.Config;
-import com.electronwill.nightconfig.core.conversion.Conversion;
-import com.electronwill.nightconfig.core.conversion.Converter;
-import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.conversion.Path;
-import cz.neumimto.towny.townycolonies.utils.Wildcards;
-import org.bukkit.Material;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 public class PluginConfig {
 
@@ -28,5 +20,20 @@ public class PluginConfig {
 
     @Path("blueprint_lore_template")
     public List<String> blueprintLoreTemplate;
+
+    @Path("storage")
+    public String storage;
+
+    @Path("db_url")
+    public String dbUrl;
+
+    @Path("db_password")
+    public String dbPassword;
+
+    @Path("db_user")
+    public String dbUser;
+
+    @Path("db_database")
+    public String dbDatabase;
 
 }

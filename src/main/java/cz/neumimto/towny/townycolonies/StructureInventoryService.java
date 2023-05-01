@@ -7,11 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Singleton;
-import java.io.LineNumberReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,5 +85,22 @@ public class StructureInventoryService {
 
     public UUID getPlayerViewingInventory(LoadedStructure structure) {
         return structsAndPlayers.get(structure.uuid);
+    }
+
+    public boolean upkeep(Town town, LoadedStructure loadedStructure, Set<ItemStack> upkeep) {
+        Inventory inv = structsAndInv.get(loadedStructure.uuid);
+        if (inv == null) {
+            return false;
+        }
+        for (ItemStack itemStack : upkeep) {
+            if (!inv.containsAtLeast(itemStack, itemStack.getAmount())) {
+                return false;
+            }
+        }
+
+        for (ItemStack itemStack : upkeep) {
+            inv.remove(itemStack);
+        }
+        return true;
     }
 }

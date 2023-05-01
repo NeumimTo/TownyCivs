@@ -57,7 +57,9 @@ public class FolliaScheduler implements Runnable, Listener {
                         Player player = Bukkit.getPlayer(playerViewingInventory);
                         TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
                                 .run(() -> handleTick(structure, townContext),
-                                     () -> handleTick(structure, townContext));
+                                     () -> TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext)));
+                    } else {
+                        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext));
                     }
                 }
             }

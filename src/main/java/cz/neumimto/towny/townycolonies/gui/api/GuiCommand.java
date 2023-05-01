@@ -4,6 +4,7 @@ import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,8 +17,8 @@ public class GuiCommand extends GuiItem {
     public GuiCommand(@NotNull ItemStack item, @NotNull String command, @NotNull CommandSender viewer) {
         super(item, e -> {
             e.setCancelled(true);
-            Bukkit.getScheduler().scheduleSyncDelayedTask(TownyColonies.INSTANCE,
-                    () -> Bukkit.dispatchCommand(viewer, command), 1);
+            TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler((Entity) viewer)
+                            .run(() -> Bukkit.dispatchCommand(viewer, command), null);
         });
     }
 
@@ -25,8 +26,8 @@ public class GuiCommand extends GuiItem {
         super(item, e -> {
             e.setCancelled(true);
             HumanEntity whoClicked = e.getWhoClicked();
-            Bukkit.getScheduler().scheduleSyncDelayedTask(TownyColonies.INSTANCE,
-                    () -> Bukkit.dispatchCommand(whoClicked, command), 1);
+            TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(whoClicked)
+                    .run(() -> Bukkit.dispatchCommand(whoClicked, command), null);
         });
     }
 

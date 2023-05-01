@@ -12,7 +12,7 @@ For any questions ping NeumimTo at the towny discord
 
 Tested on:
 
-- paper 1.18.x (might work on 1.17, wont work with anything below 1.16)
+- folia 1.19.4 (might work on 1.17, wont work with anything below 1.16)
 - towny 0.98.1.0 (might or might not work with older versions)
 
 ## Building from source

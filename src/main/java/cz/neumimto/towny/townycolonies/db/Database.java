@@ -156,12 +156,10 @@ public class Database {
     }
 
     public static void scheduleSave(LoadedStructure structure) {
-        LoadedStructure clone = structure.clone();
-
-        Bukkit.getScheduler().runTaskAsynchronously(TownyColonies.INSTANCE, () -> save(clone));
+        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> save(structure));
     }
 
     public static void scheduleRemove(LoadedStructure structure) {
-        Bukkit.getScheduler().runTaskAsynchronously(TownyColonies.INSTANCE, () -> remove(structure.uuid));
+        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> remove(structure.uuid));
     }
 }
