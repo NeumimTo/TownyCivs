@@ -7,6 +7,7 @@ import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
+import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
@@ -90,7 +91,7 @@ public class FolliaScheduler implements Runnable, Listener {
 
         structure.unsavedTickCount++;
         if (structure.unsavedTickCount % structure.structureDef.saveEachNTicks == 0) {
-            structureService.save(structure);
+            Storage.scheduleSave(structure);
         }
     }
 }

@@ -106,10 +106,10 @@ public class SubclaimService {
         return false;
     }
 
-    public Optional<Structure> getStructureAt(Location location) {
+    public Optional<LoadedStructure> getStructureAt(Location location) {
         for (Region subclaim : subclaims) {
             if (subclaim.boundingBox.contains(location.getX(), location.getY(), location.getZ())) {
-                return configurationService.findStructureById(subclaim.structureId);
+                return Optional.of(subclaim.loadedStructure);
             }
         }
         return Optional.empty();

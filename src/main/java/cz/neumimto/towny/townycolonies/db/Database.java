@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
-public class Database {
+public final class Database implements IStorage {
 
     public static final int currentSchema = 1;
 
@@ -31,7 +31,8 @@ public class Database {
     private static String all_structures_sql;
     private static String save_sql;
 
-    public static void init() {
+    @Override
+    public void init() {
         prefix = TownySettings.getSQLTablePrefix().toUpperCase();
         TownyDataSource dataSource = TownyAPI.getInstance().getDataSource();
         if (!(dataSource instanceof TownySQLSource)) {
@@ -77,7 +78,8 @@ public class Database {
         return 0;
     }
 
-    public static Collection<LoadedStructure> allStructures() {
+    @Override
+    public Collection<LoadedStructure> allStructures() {
         Set<LoadedStructure> set = new HashSet<>();
         try {
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
@@ -114,13 +116,9 @@ public class Database {
         }
     }
 
-    public static void saveAll(Collection<LoadedStructure> values) {
-        for (LoadedStructure structure : values) {
-            save(structure);
-        }
-    }
 
-    public static void save(LoadedStructure structure) {
+    @Override
+    public void save(LoadedStructure structure) {
         try {
             TownyColonies.logger.info("Saving structure " + structure.uuid);
             String sql = save_sql;
@@ -133,7 +131,7 @@ public class Database {
                 stmt.setString(4, structure.structureId); //"structure_id"
                 Location center = structure.center;
                 stmt.setString(5, center.getWorld().getName()+";"+center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
-                stmt.setBoolean(7, structure.editMode.get()); //"edit_mode"
+                stmt.setBoolean(6, structure.editMode.get()); //"edit_mode"
                 stmt.executeUpdate();
             }
         } catch (SQLException e) {
@@ -141,7 +139,8 @@ public class Database {
         }
     }
 
-    public static void remove(UUID uuid) {
+    @Override
+    public void remove(UUID uuid) {
         try {
             TownyColonies.logger.info("Removing Structure " + uuid);
             String sql = queryFromFile("townycolonies_delete.sql");
@@ -155,11 +154,5 @@ public class Database {
         }
     }
 
-    public static void scheduleSave(LoadedStructure structure) {
-        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> save(structure));
-    }
 
-    public static void scheduleRemove(LoadedStructure structure) {
-        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> remove(structure.uuid));
-    }
 }

@@ -6,6 +6,8 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.db.Database;
+import cz.neumimto.towny.townycolonies.db.Flatfile;
+import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
@@ -160,8 +162,8 @@ public class StructureService {
 
     public void loadAll() {
         structures.clear();
-        Database.init();
-        Collection<LoadedStructure> loaded = Database.allStructures();
+        new Storage(new Flatfile());
+        Collection<LoadedStructure> loaded = Storage.allStructures();
         Collection<UUID> towns = TownyAPI.getInstance().getTowns().stream().map(Town::getUUID).collect(Collectors.toSet());
         loaded.stream()
                 .peek(a -> a.structureDef = configurationService.findStructureById(a.structureId).orElse(null))
@@ -179,14 +181,6 @@ public class StructureService {
                 });
     }
 
-    public void saveAll() {
-        Database.saveAll(structures.values());
-    }
-
-    public void save(LoadedStructure loadedStructure) {
-        Database.scheduleSave(loadedStructure);
-    }
-
     public void delete(Region region, Player player) {
         subclaimService.delete(region);
         LoadedStructure l = region.loadedStructure;
@@ -197,7 +191,7 @@ public class StructureService {
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " deleted structure " + l.structureDef.name);
 
-        Database.scheduleRemove(l);
+        Storage.scheduleRemove(l);
     }
 
     public Optional<LoadedStructure> findStructureByUUID(UUID uuid) {

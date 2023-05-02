@@ -5,6 +5,7 @@ import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
+import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.model.*;
 import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -211,7 +212,7 @@ public class ManagementService {
         structureService.addToTown(town, loadedStructure);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
-        structureService.save(loadedStructure);
+        Storage.scheduleSave(loadedStructure);
     }
 
     public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
