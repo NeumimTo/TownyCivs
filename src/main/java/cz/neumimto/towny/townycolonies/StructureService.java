@@ -157,16 +157,14 @@ public class StructureService {
             return a;
         });
 
-        loadedStructure.town = town.getUUID();
     }
 
     public void loadAll() {
         structures.clear();
-        new Storage(new Flatfile());
+        new Storage(TownyColonies.injector.getInstance(Flatfile.class));
         Collection<LoadedStructure> loaded = Storage.allStructures();
         Collection<UUID> towns = TownyAPI.getInstance().getTowns().stream().map(Town::getUUID).collect(Collectors.toSet());
         loaded.stream()
-                .peek(a -> a.structureDef = configurationService.findStructureById(a.structureId).orElse(null))
                 .filter(a -> a.structureDef != null)
                 .filter(a->towns.contains(a.town))
                 .peek(a -> {

@@ -2,10 +2,7 @@ package cz.neumimto.towny.townycolonies.commands;
 
 
 import co.aikar.commands.BaseCommand;
-import co.aikar.commands.annotation.CommandAlias;
-import co.aikar.commands.annotation.CommandPermission;
-import co.aikar.commands.annotation.Default;
-import co.aikar.commands.annotation.Subcommand;
+import co.aikar.commands.annotation.*;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Translatable;
@@ -53,7 +50,7 @@ public class StructureCommands extends BaseCommand {
             player.sendMessage(Translatable.of("toco_town_required").forLocale(player));
             return;
         }
-        mainMenuGui.display(player);
+        mainMenuGui.display(player, resident.getTownOrNull().getName());
     }
 
     @Subcommand("structures|ss")
@@ -78,5 +75,9 @@ public class StructureCommands extends BaseCommand {
         structureGui.display(player, structureId);
     }
 
+    @HelpCommand
+    public void displayHelp() {
+
+    }
 
 }

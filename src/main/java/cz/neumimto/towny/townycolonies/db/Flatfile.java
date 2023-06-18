@@ -1,10 +1,14 @@
 package cz.neumimto.towny.townycolonies.db;
 
+import com.electronwill.nightconfig.core.Config;
+import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,6 +23,10 @@ import java.util.logging.Level;
 public final class Flatfile implements IStorage {
 
     private Path storage = null;
+
+    @Inject
+    private ConfigurationService configurationService;
+
     @Override
     public void init() {
         storage = TownyColonies.INSTANCE.getDataFolder().toPath().resolve("storage");
@@ -28,8 +36,10 @@ public final class Flatfile implements IStorage {
     @Override
     public void save(LoadedStructure structure) {
         YamlConfiguration yaml = new YamlConfiguration();
-        yaml.set("uuid", structure.uuid);
-        yaml.set("town", structure.town);
+        yaml.set("uuid", structure.uuid.toString());
+        yaml.set("town", structure.town.toString());
+        yaml.set("structureId", structure.structureId);
+
         yaml.set("center", structure.center);
         yaml.set("editMode", structure.editMode.get());
         yaml.set("lastTickTime", structure.lastTickTime);
@@ -59,11 +69,15 @@ public final class Flatfile implements IStorage {
             try {
                 yaml.load(file);
 
-                var struct = new LoadedStructure();
-                struct.uuid = UUID.fromString(yaml.getString("uuid"));
-                struct.town = UUID.fromString(yaml.getString("town"));
-                struct.center = yaml.getLocation("center");
-                struct.editMode = new AtomicBoolean(yaml.getBoolean("editMode"));
+                var struct = new LoadedStructure(
+                        UUID.fromString(yaml.getString("uuid")),
+                        UUID.fromString(yaml.getString("town")),
+                        yaml.getString("structureId"),
+                        yaml.getLocation("center"),
+                        configurationService.findStructureById(yaml.getString("structureId")).orElse(null)
+                );
+
+                struct.editMode.set(yaml.getBoolean("editMode"));
                 struct.lastTickTime = yaml.getLong("lastTickTime");
                 set.add(struct);
             } catch (IOException | InvalidConfigurationException e) {

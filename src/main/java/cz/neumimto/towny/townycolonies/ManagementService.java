@@ -74,7 +74,7 @@ public class ManagementService {
                 Region region1 = overlaps.get();
                 Structure overlapingStruct = configurationService.findStructureById(region1.structureId).get();
                 MiniMessage miniMessage = MiniMessage.miniMessage();
-                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>"+editSession.structure.name + " region overlaps with " + overlapingStruct.name+"</red>"));
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" + editSession.structure.name + " region overlaps with " + overlapingStruct.name + "</red>"));
                 isOk = false;
 
                 if (editSession.overlappintStructureBorder != null) {
@@ -92,7 +92,7 @@ public class ManagementService {
             Town town = TownyAPI.getInstance().getResident(player).getTownOrNull();
             if (subclaimService.isOutsideTownClaim(region, town)) {
                 MiniMessage miniMessage = MiniMessage.miniMessage();
-                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>"+editSession.structure.name + " is outside town claim"+"</red>"));
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" + editSession.structure.name + " is outside town claim" + "</red>"));
                 isOk = false;
             }
 
@@ -117,7 +117,7 @@ public class ManagementService {
     }
 
     public void endSession(Player player, Location location) {
-         if (editSessions.containsKey(player.getUniqueId())) {
+        if (editSessions.containsKey(player.getUniqueId())) {
             EditSession editSession = editSessions.get(player.getUniqueId());
             editSession.center = location;
             if (moveTo(player, editSession.center)) {
@@ -193,14 +193,8 @@ public class ManagementService {
 
         Location center = new Location(player.getWorld(), location.getX(), location.getY(), location.getZ());
 
-        LoadedStructure loadedStructure = new LoadedStructure();
-        loadedStructure.uuid = UUID.randomUUID();
-        loadedStructure.structureId = structure.id;
-        loadedStructure.center = center;
-
-        loadedStructure.town = town.getUUID();
-        loadedStructure.structureDef = structure;
-        loadedStructure.editMode = new AtomicBoolean(true);
+        LoadedStructure loadedStructure = new LoadedStructure(UUID.randomUUID(), town.getUUID(), structure.id, center, structure);
+        loadedStructure.editMode.set(true);
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
 
@@ -220,7 +214,7 @@ public class ManagementService {
 
         if (!structuresBeingEdited.contains(loadedStructure.uuid)) {
             structuresBeingEdited.add(loadedStructure.uuid);
-            TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " put " + loadedStructure.structureDef.name +  " into edit mode ");
+            TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " put " + loadedStructure.structureDef.name + " into edit mode ");
 
             loadedStructure.editMode.set(true);
 
@@ -234,7 +228,7 @@ public class ManagementService {
 
             } else {
                 MiniMessage miniMessage = MiniMessage.miniMessage();
-                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" +loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
+                player.sendMessage(miniMessage.deserialize("<gold>[TownyColonies]</gold> <red>" + loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
             }
         }
     }

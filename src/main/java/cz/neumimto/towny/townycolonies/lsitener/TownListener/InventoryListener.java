@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 
 import javax.inject.Inject;
@@ -47,13 +48,11 @@ public class InventoryListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryOpen(EntityInteractEvent event) {
-        if (!(event.getEntity() instanceof Player )) {
-            return;
-        }
-        Player player = (Player) event.getEntity();
-        if (event.getBlock().getType() == Material.CHEST) {
-            Location location = event.getBlock().getLocation();
+    public void onInventoryOpen(PlayerInteractEvent event) {
+        int i = 0;
+        Player player = (Player) event.getPlayer();
+        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.CHEST) {
+            Location location = event.getClickedBlock().getLocation();
 
             Resident resident = TownyUniverse.getInstance().getResident(player.getUniqueId());
             if (resident.getTownOrNull() == null) {

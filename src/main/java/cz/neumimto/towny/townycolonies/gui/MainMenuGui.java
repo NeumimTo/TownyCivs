@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.palmergames.bukkit.towny.TownyUniverse;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import org.bukkit.entity.Player;
 
@@ -13,8 +14,8 @@ public class MainMenuGui extends TCGui {
         super("Main.conf", TownyColonies.INSTANCE.getDataFolder().toPath());
     }
 
-    public void display(Player player) {
-        ChestGui chestGui = loadGui(player, null);
+    public void display(Player player, String townName) {
+        ChestGui chestGui = loadGui(player, townName);
         chestGui.show(player);
     }
 }

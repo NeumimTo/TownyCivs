@@ -7,10 +7,12 @@ import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.db.TownyDataSource;
 import com.palmergames.bukkit.towny.db.TownySQLSource;
 import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -30,6 +32,9 @@ public final class Database implements IStorage {
 
     private static String all_structures_sql;
     private static String save_sql;
+
+    @Inject
+    private ConfigurationService configurationService;
 
     @Override
     public void init() {
@@ -89,14 +94,20 @@ public final class Database implements IStorage {
             try (var statement = connection.prepareStatement(qry)) {
                 try (var rs = statement.executeQuery()) {
                     while (rs.next()) {
-                        var ls = new LoadedStructure();
-                        ls.uuid = UUID.fromString(rs.getString("structure_uuid"));
-                        ls.town = UUID.fromString(rs.getString("town_uuid"));
-                        ls.lastTickTime = rs.getLong("last_tick_time");
-                        ls.structureId = rs.getString("structure_id");
+
                         String[] center = rs.getString("center").split(";");
-                        ls.center = new Location(Bukkit.getWorld(center[0]),Integer.parseInt(center[1]),Integer.parseInt(center[2]),Integer.parseInt(center[3]));
-                        ls.editMode = new AtomicBoolean(rs.getBoolean("edit_mode"));
+                        String structureId = rs.getString("structure_id");
+
+                        var ls = new LoadedStructure(
+                                UUID.fromString(rs.getString("structure_uuid")),
+                                UUID.fromString(rs.getString("town_uuid")),
+                                structureId,
+                                new Location(Bukkit.getWorld(center[0]), Integer.parseInt(center[1]), Integer.parseInt(center[2]), Integer.parseInt(center[3])),
+                                configurationService.findStructureById(structureId).orElse(null)
+                        );
+
+                        ls.lastTickTime = rs.getLong("last_tick_time");
+                        ls.editMode.set(rs.getBoolean("edit_mode"));
                         set.add(ls);
                     }
                 }
@@ -130,7 +141,7 @@ public final class Database implements IStorage {
                 stmt.setLong(3, structure.lastTickTime); //"last_tick_time"
                 stmt.setString(4, structure.structureId); //"structure_id"
                 Location center = structure.center;
-                stmt.setString(5, center.getWorld().getName()+";"+center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
+                stmt.setString(5, center.getWorld().getName() + ";" + center.getBlockX() + ";" + center.getBlockY() + ";" + center.getBlockZ()); //"center"
                 stmt.setBoolean(6, structure.editMode.get()); //"edit_mode"
                 stmt.executeUpdate();
             }
@@ -146,7 +157,7 @@ public final class Database implements IStorage {
             String sql = queryFromFile("townycolonies_delete.sql");
             ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getContext();
             Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
-            try (var stmt = connection.prepareStatement(sql)){
+            try (var stmt = connection.prepareStatement(sql)) {
                 stmt.setString(1, uuid.toString());
             }
         } catch (SQLException e) {

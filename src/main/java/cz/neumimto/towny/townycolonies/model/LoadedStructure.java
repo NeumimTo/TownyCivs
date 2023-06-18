@@ -15,16 +15,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @NotThreadSafe
 public class LoadedStructure {
 
-    public UUID uuid; //threadsafe
+    public final UUID uuid; //threadsafe
 
-    public UUID town; //threadsafe
+    public final UUID town; //threadsafe
 
-    public String structureId; //threadsafe
-    public Location center; //threadsafe
+    public final String structureId; //threadsafe
+    public final Location center; //threadsafe
 
-    public AtomicBoolean editMode = new AtomicBoolean(false);
+    public final transient Structure structureDef; //threadsafe
 
-    public transient Structure structureDef; //threadsafe
+    public final AtomicBoolean editMode;
 
     public transient int unsavedTickCount;
 
@@ -32,14 +32,12 @@ public class LoadedStructure {
 
     public transient long nextTickTime;
 
-    public LoadedStructure clone() {
-        var l = new LoadedStructure();
-        l.uuid = uuid;
-        l.town = town;
-        l.center = center;
-        l.structureId = structureId;
-        l.lastTickTime = lastTickTime;
-        l.editMode = new AtomicBoolean(editMode.get());
-        return l;
+    public LoadedStructure(UUID uuid, UUID town, String structureId, Location center, Structure structureDef) {
+        this.uuid = uuid;
+        this.town = town;
+        this.structureId = structureId;
+        this.center = center;
+        this.structureDef = structureDef;
+        this.editMode = new AtomicBoolean(false);
     }
 }

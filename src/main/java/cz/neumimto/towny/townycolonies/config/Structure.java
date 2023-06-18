@@ -8,6 +8,7 @@ import com.electronwill.nightconfig.core.conversion.Path;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
+import cz.neumimto.towny.townycolonies.mechanics.common.Wrapper;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -137,6 +138,13 @@ public class Structure {
                 if (mech.isPresent()) {
                     Mechanic m = mech.get();
                     Object aNew = m.getNew();
+                    if (aNew instanceof Wrapper w) {
+                        if (w.isObject()) {
+                            new ObjectConverter().toObject(config.get("Value"), aNew);
+                            mechs.add(new LoadedPair<>(aNew, m));
+                            continue;
+                        }
+                    }
                     new ObjectConverter().toObject(config, aNew);
                     mechs.add(new LoadedPair<>(aNew, m));
                 }

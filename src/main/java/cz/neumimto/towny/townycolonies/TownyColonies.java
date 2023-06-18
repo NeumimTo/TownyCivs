@@ -8,6 +8,7 @@ import com.google.inject.Injector;
 import com.palmergames.bukkit.towny.TownyAPI;
 import cz.neumimto.towny.townycolonies.commands.StructureCommands;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
+import cz.neumimto.towny.townycolonies.lsitener.TownListener.InventoryListener;
 import cz.neumimto.towny.townycolonies.lsitener.TownListener.TownListener;
 import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public final class TownyColonies extends JavaPlugin {
+public class TownyColonies extends JavaPlugin {
 
     public static Logger logger;
 
@@ -126,6 +127,7 @@ public final class TownyColonies extends JavaPlugin {
 
 
             Bukkit.getPluginManager().registerEvents(injector.getInstance(TownListener.class), this);
+            Bukkit.getPluginManager().registerEvents(injector.getInstance(InventoryListener.class), this);
         }
 
         injector.getInstance(ItemService.class).registerRecipes();

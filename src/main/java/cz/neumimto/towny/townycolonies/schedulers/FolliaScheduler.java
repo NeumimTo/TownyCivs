@@ -51,6 +51,7 @@ public class FolliaScheduler implements Runnable, Listener {
                     structure.nextTickTime = System.currentTimeMillis() + structure.structureDef.period * 1000;
                     structure.lastTickTime = System.currentTimeMillis();
                     townContext.structure = structure.structureDef;
+                    townContext.loadedStructure = structure;
 
 
                     UUID playerViewingInventory = inventoryService.getPlayerViewingInventory(structure);

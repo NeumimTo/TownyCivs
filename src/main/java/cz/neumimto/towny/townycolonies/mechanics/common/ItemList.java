@@ -49,4 +49,9 @@ public class ItemList implements Wrapper {
             return itemStack;
         }
     }
+
+    @Override
+    public boolean isObject() {
+        return true;
+    }
 }

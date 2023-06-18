@@ -11,7 +11,6 @@ public class Storage {
     private static IStorage impl;
 
     public Storage(IStorage impl) {
-        Objects.requireNonNull(Storage.impl, "Storage already initialized");
         Storage.impl = impl;
         Storage.impl.init();
     }
