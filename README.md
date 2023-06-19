@@ -2,7 +2,7 @@
 
 Towny addon that adds automated farms, factories and administrative buildings into towny town & nation system
 
-The plugin forces players to build houses from predefine block palletes
+The plugin forces players to build from predefined block pallets
 
 **Alphabuilds are not suitable for production env.**
 
@@ -12,7 +12,7 @@ For any questions ping NeumimTo at the towny discord
 
 Tested on:
 
-- folia 1.19.4 (might work on 1.17, wont work with anything below 1.16)
+- folia & paper 1.19.4  (might work on 1.17/1.18, wont work with anything below 1.16)
 - towny 0.98.1.0 (might or might not work with older versions)
 
 ## Building from source
@@ -24,8 +24,8 @@ Tested on:
 
 - drop the jar into plugins folder
 - default configs might not be balanced to suit yours server economy
-- Towny must use mysql database
-- Append sql database connection flags by `&allowMultiQueries=true`
+
+- ~~If using towny SQL storage append sql database connection flags by `&allowMultiQueries=true`~~
 
 ## Gameplay
 
