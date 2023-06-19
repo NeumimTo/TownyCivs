@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'cz.neumimto.towny'
-version = 'ALPHA-1.0.0'
+version = 'ALPHA-1.0.1'
 
 repositories {
     mavenCentral()
@@ -56,7 +56,7 @@ dependencies {
     compileOnly 'com.google.inject:guice:5.1.0'
 
     implementation fileTree('libs/')
-    implementation fileTree('plugins-test/')
+    testImplementation fileTree('plugins-test/')
 
 //    implementation 'com.github.stefvanschie.inventoryframework:IF:0.10.8'
     implementation "co.aikar:acf-paper:0.5.1-SNAPSHOT"
