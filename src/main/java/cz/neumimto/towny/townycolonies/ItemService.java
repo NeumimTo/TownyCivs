@@ -1,5 +1,6 @@
 package cz.neumimto.towny.townycolonies;
 
+import com.palmergames.bukkit.towny.object.Translatable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -10,20 +11,35 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class ItemService {
+
+    public static ItemStack getTownAdministrationTool() {
+        ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
+        itemStack.editMeta(meta -> {
+            meta.setCustomModelData(3077);
+            meta.displayName(Component.text("Town administration"));
+        });
+        return itemStack;
+    }
+
+    public static ItemStack getStructureTool() {
+        ItemStack itemStack = new ItemStack(Material.PAPER);
+        itemStack.editMeta(meta -> {
+            meta.setCustomModelData(3078);
+            meta.displayName(Component.text("Structure Edit Tool"));
+        });
+        return itemStack;
+    }
 
     public void registerRecipes() {
         NamespacedKey recipe = NamespacedKey.fromString("townycolonies:town_book");
         if (Bukkit.getServer().getRecipe(recipe) != null) {
             Bukkit.getServer().removeRecipe(recipe);
         }
-        ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
-        itemStack.editMeta(meta -> {
-            meta.setCustomModelData(3077);
-            meta.displayName(Component.text("Town administration"));
-        });
+        ItemStack itemStack = getTownAdministrationTool();
         ShapelessRecipe shapelessRecipe = new ShapelessRecipe(recipe, itemStack);
         shapelessRecipe.addIngredient(Material.BOOK);
         shapelessRecipe.addIngredient(Material.EMERALD);
@@ -34,11 +50,7 @@ public class ItemService {
         if (Bukkit.getServer().getRecipe(recipe) != null) {
             Bukkit.getServer().removeRecipe(recipe);
         }
-        itemStack = new ItemStack(Material.PAPER);
-        itemStack.editMeta(meta -> {
-            meta.setCustomModelData(3078);
-            meta.displayName(Component.text("Structure Edit Tool"));
-        });
+        itemStack = getStructureTool();
         ShapelessRecipe editTool = new ShapelessRecipe(recipe, itemStack);
         editTool.addIngredient(Material.PAPER);
         editTool.addIngredient(Material.WOODEN_SHOVEL);

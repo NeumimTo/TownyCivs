@@ -9,9 +9,7 @@ import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
-import cz.neumimto.towny.townycolonies.gui.MainMenuGui;
-import cz.neumimto.towny.townycolonies.gui.StructureGui;
-import cz.neumimto.towny.townycolonies.gui.StructuresGui;
+import cz.neumimto.towny.townycolonies.gui.*;
 import org.bukkit.entity.Player;
 
 import javax.inject.Inject;
@@ -29,6 +27,12 @@ public class StructureCommands extends BaseCommand {
 
     @Inject
     private MainMenuGui mainMenuGui;
+
+    @Inject
+    private HelpMenu1Gui helpMenu1Gui;
+
+    @Inject
+    private HelpMenu2Gui helpMenu2Gui;
 
     @Inject
     private StructureService structureService;
@@ -76,8 +80,13 @@ public class StructureCommands extends BaseCommand {
     }
 
     @HelpCommand
-    public void displayHelp() {
-
+    @CommandPermission("townycolonies.commands.common.mainmenu")
+    public void displayHelp(Player player, @Default(value = "1") int page) {
+        if (page == 1) {
+            helpMenu1Gui.display(player);
+        } else if (page == 2) {
+            helpMenu2Gui.display(player);
+        }
     }
 
 }

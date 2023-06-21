@@ -9,7 +9,7 @@ plugins {
 }
 
 group = 'cz.neumimto.towny'
-version = 'ALPHA-1.0.1'
+version = 'ALPHA-1.0.2'
 
 repositories {
     mavenCentral()
