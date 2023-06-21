@@ -5,6 +5,7 @@ import cz.neumimto.towny.townycolonies.mechanics.common.DoubleWrapper;
 
 class Price implements Mechanic<DoubleWrapper> {
 
+
     @Override
     public boolean check(TownContext townContext, DoubleWrapper configContext) {
         return townContext.town.getAccount().getHoldingBalance() >= configContext.value;
@@ -23,6 +24,11 @@ class Price implements Mechanic<DoubleWrapper> {
     @Override
     public void okmessage(TownContext townContext, DoubleWrapper configuration) {
         TownyMessaging.sendPrefixedTownMessage(townContext.town, townContext.player.getName() + " bought " + townContext.structure.name);
+    }
+
+    @Override
+    public String id() {
+        return Mechanics.PRICE;
     }
 
     @Override

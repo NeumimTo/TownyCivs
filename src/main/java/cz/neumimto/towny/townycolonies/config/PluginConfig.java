@@ -6,12 +6,6 @@ import java.util.List;
 
 public class PluginConfig {
 
-    @Path("structure_lore_template")
-    public List<String> structureLoreTemplate;
-
-    @Path("structure_lore_desc_templatc")
-    public String structureLoreDescTemplate;
-
     @Path("copy_defaults")
     public boolean copyDefaults;
 

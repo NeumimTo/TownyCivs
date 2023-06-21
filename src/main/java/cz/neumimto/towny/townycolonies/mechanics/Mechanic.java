@@ -13,6 +13,8 @@ public interface Mechanic<C> {
     default void okmessage(TownContext townContext, C configuration) {
     }
 
+    String id();
+
     C getNew();
 }
 

@@ -24,6 +24,11 @@ class MStructure implements Mechanic<StringWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.STRUCTURE;
+    }
+
+    @Override
     public StringWrapper getNew() {
         return new StringWrapper();
     }

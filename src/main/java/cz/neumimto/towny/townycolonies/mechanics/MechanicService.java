@@ -22,12 +22,12 @@ public class MechanicService {
 
     private Map<String, Mechanic> prodMech = new HashMap<>();
 
-    public void buyReq(String name, Mechanic mech) {
-        buyReqs.put(name.toLowerCase(Locale.ROOT), mech);
+    public void buyReq(Mechanic mech) {
+        buyReqs.put(mech.id().toLowerCase(Locale.ROOT), mech);
     }
 
-    public void prodReq(String name, Mechanic mech) {
-        productionReq.put(name.toLowerCase(Locale.ROOT), mech);
+    public void prodReq(Mechanic mech) {
+        productionReq.put(mech.id().toLowerCase(Locale.ROOT), mech);
     }
 
     public void registerDefaults() {
@@ -36,20 +36,20 @@ public class MechanicService {
         placeReq.clear();
         prodMech.clear();
 
-        buyReq("permission", new Permission());
-        buyReq("price", new Price());
-        buyReq("town_level", new TownRank());
-        buyReq("structure", injector.getInstance(MStructure.class));
+        buyReq(new Permission());
+        buyReq(new Price());
+        buyReq(new TownRank());
+        buyReq(injector.getInstance(MStructure.class));
 
-        prodReq("town_upkeep", new Price());
+        prodReq(new Price());
 
-        placeReq("y_bellow", new YBellow());
-        placeReq("y_above", new YAbove());
-        placeReq("world", new WorldReq());
-        placeReq("town_level", new TownRank());
-        placeReq("structure", injector.getInstance(MStructure.class));
+        placeReq(new YBellow());
+        placeReq(new YAbove());
+        placeReq(new WorldReq());
+        placeReq(new TownRank());
+        placeReq(injector.getInstance(MStructure.class));
 
-        prodMech("item", new ItemProduction());
+        prodMech(new ItemProduction());
 
         Bukkit.getPluginManager().callEvent(new RegisterMechanicEvent(this));
     }
@@ -66,12 +66,12 @@ public class MechanicService {
         return Optional.ofNullable(placeReq.get(mechanic.toLowerCase(Locale.ROOT)));
     }
 
-    public void placeReq(String name, Mechanic mech) {
-        placeReq.put(name.toLowerCase(Locale.ROOT), mech);
+    public void placeReq(Mechanic mech) {
+        placeReq.put(mech.id().toLowerCase(Locale.ROOT), mech);
     }
 
-    public void prodMech(String name, ItemProduction virtualItemProduction) {
-        prodMech.put(name.toLowerCase(Locale.ROOT), virtualItemProduction);
+    public void prodMech(Mechanic mech) {
+        prodMech.put(mech.id().toLowerCase(Locale.ROOT), mech);
     }
 
     public Optional<Mechanic> prodMech(String name) {

@@ -16,6 +16,11 @@ class TownRank implements Mechanic<DoubleWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.TOWN_RANK;
+    }
+
+    @Override
     public DoubleWrapper getNew() {
         return new DoubleWrapper();
     }

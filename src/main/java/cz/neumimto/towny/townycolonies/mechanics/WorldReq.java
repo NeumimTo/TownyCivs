@@ -15,6 +15,11 @@ class WorldReq implements Mechanic<StringWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.WORLD;
+    }
+
+    @Override
     public StringWrapper getNew() {
         return new StringWrapper();
     }

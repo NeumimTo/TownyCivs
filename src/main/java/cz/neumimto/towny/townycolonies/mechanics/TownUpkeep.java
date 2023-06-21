@@ -15,6 +15,11 @@ class TownUpkeep implements Mechanic<DoubleWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.TOWN_UPKEEP;
+    }
+
+    @Override
     public DoubleWrapper getNew() {
         return new DoubleWrapper();
     }

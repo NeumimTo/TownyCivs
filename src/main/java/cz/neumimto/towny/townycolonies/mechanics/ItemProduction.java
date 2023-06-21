@@ -3,14 +3,18 @@ package cz.neumimto.towny.townycolonies.mechanics;
 import cz.neumimto.towny.townycolonies.StructureInventoryService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.mechanics.common.ItemList;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class ItemProduction implements Mechanic<ItemList> {
+
+
+    @Override
+    public String id() {
+        return Mechanics.ITEM_PRODUCTION;
+    }
 
     @Override
     public boolean check(TownContext townContext, ItemList configContext) {

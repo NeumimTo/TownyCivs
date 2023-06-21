@@ -2,7 +2,23 @@
 
 Towny addon that adds automated farms, factories and administrative buildings into towny town & nation system
 
-The plugin forces players to build from predefined block pallets
+The plugin has been inspired by the mod minecolonies (hence its name) and plugin civs
+
+Basic gameplay:
+
+ - Players buy structure blueprint from the ingame shop
+ - Each blueprint has its own building requirements (specific block palette, required region size, biome placement, ....)
+ - A town mayor/an assistant choose location for the structure within town claim
+ - Residents proceeds to build the structure 
+ - If minimal building requirements are met the structure becomes active (item rewards, permission node for town residents, ... )
+
+The main idea is to encourage and reward players to build actual buildings instead of making one large cobblestone house in the middle of their town.
+
+Everything is configurable - you can (and you should) create your own blueprints
+For documentation check default config of cactus_farm.conf its all explained in comments
+
+ - Region processing is done in an asychronous thread
+ - Unlike civs TownyColonies wont load any addition chunks when distributing region production
 
 **Alphabuilds are not suitable for production env.**
 
@@ -27,15 +43,16 @@ Tested on:
 
 - ~~If using towny SQL storage append sql database connection flags by `&allowMultiQueries=true`~~
 
-## Gameplay
+## Commands
+
+- Theres only one command - `/toco` - an entrypoint for opening an inventory menu 
+
+## Permissions
 
 - Permission: `townycolonies.administrative`
-  - Buys new blueprints
+  - Ability to buy new blueprints
 
 - Permission: `townycolonies.architect`
-  - Chooses blueprint location
-  - Can toggle edit mode for structure
+  - Ability to place blueprint
 
-- Players
-  - Build structure according to the blueprint block requirements
-  - Once the build is finish;ed they need to call the architect to toggle edit mode
+Both permission should be given to town co/mayor/assistant

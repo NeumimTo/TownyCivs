@@ -23,6 +23,11 @@ public class ItemUpkeep implements Mechanic<ItemList> {
         return true;
     }
 
+    @Override
+    public String id() {
+        return Mechanics.UPKEEP;
+    }
+
 
     @Override
     public ItemList getNew() {

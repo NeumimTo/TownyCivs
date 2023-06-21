@@ -4,9 +4,13 @@ package cz.neumimto.towny.townycolonies.config;
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.file.FileConfig;
-import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycolonies.Materials;
 import cz.neumimto.towny.townycolonies.TownyColonies;
+import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
+import cz.neumimto.towny.townycolonies.mechanics.Mechanics;
+import cz.neumimto.towny.townycolonies.mechanics.common.ItemList;
+import cz.neumimto.towny.townycolonies.mechanics.common.StringList;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -26,9 +30,9 @@ import java.util.logging.Level;
 @Singleton
 public class ConfigurationService {
 
-    private Map<String, Structure> structures = new HashMap<>();
+    private final Map<String, Structure> structures = new HashMap<>();
 
-    private Map<Material, BlueprintItem[]> blueprintItems = new HashMap();
+    private final Map<Material, BlueprintItem[]> blueprintItems = new HashMap();
 
     public PluginConfig config;
 
@@ -142,37 +146,68 @@ public class ConfigurationService {
         var mm = MiniMessage.miniMessage();
 
         List<Component> list = new ArrayList<>();
-        List<Component> descL = structure.description.stream()
-                .map(a -> config.structureLoreDescTemplate.replaceFirst("\\{line}", a))
-                .map(mm::deserialize)
-                .toList();
 
-        for (String s : config.structureLoreTemplate) {
-            if (s.contains("{desc}")) {
-                list.addAll(descL);
-            } else {
-                s = s.replaceFirst("\\{towncount}", String.valueOf(townCount))
-                        .replaceFirst("\\{maxcount}", String.valueOf(maxCount));
-
+        for (String line : structure.description) {
+            List<String> expanded = expandLine(line, structure);
+            for (String s : expanded) {
+                s = replaceSingleLine(s,"%toco_lore_tickrate%", Translatable.of("toco_lore_tickrate").translate());
+                s = replaceSingleLine(s,"%toco_lore_production%", Translatable.of("toco_lore_production").translate());
+                s = replaceSingleLine(s,"%toco_lore_banned_biomes%", Translatable.of("toco_lore_banned_biomes").translate());
+                s = replaceSingleLine(s, "%tickrate%", String.valueOf(structure.period));
+                s = replaceSingleLine(s, "%maxcount%", String.valueOf(structure.maxCount));
                 list.add(mm.deserialize(s));
             }
         }
+
         return list;
     }
 
-    public List<Component> buildBlueprintLore(Structure structure) {
-        var mm = MiniMessage.miniMessage();
-        List<Component> list = new ArrayList<>();
-        List<Component> descL = structure.description.stream()
-                .map(a -> config.blueprintLoreDescTemplate.replaceFirst("\\{line}", a))
-                .map(mm::deserialize)
-                .toList();
-
-        for (String s : config.blueprintLoreTemplate) {
-            if (s.contains("{desc}")) {
-                list.addAll(descL);
+    private List<String> expandLine(String line, Structure structure) {
+        List<String> list = new ArrayList<>();
+        if (line.contains("%toco_lore_production_list%")) {
+            line = replaceSingleLine(line, "%toco_lore_production_list%", Translatable.of("toco_lore_production_list").translate());
+            for (Structure.LoadedPair<Mechanic<Object>, Object> l : structure.production) {
+                if (l.mechanic.id().equals(Mechanics.ITEM_PRODUCTION)) {
+                    ItemList itemList = (ItemList) l.configValue;
+                    for (ItemList.ConfigItem e : itemList.configItems) {
+                        String matName = e.customName;
+                        if (matName == null) {
+                            Material material = Material.matchMaterial(e.material);
+                            if (material != null) {
+                                matName = material.name();
+                            } else {
+                                matName = "UNKNOWN";
+                            }
+                        }
+                        int amount = e.amount;
+                        String matLine = replaceSingleLine(line, "%amount%", String.valueOf(amount));
+                        matLine = replaceSingleLine(matLine, "%item%", matName.substring(0, 1).toUpperCase() + matName.substring(1).replaceAll("_", " "));
+                        list.add(matLine);
+                    }
+                }
             }
+        } else if (line.contains("%toco_lore_banned_biomes_list%")) {
+            if (structure.placeRequirements == null || structure.placeRequirements.isEmpty()) {
+                return Collections.emptyList();
+            }
+            line = replaceSingleLine(line, "%toco_lore_banned_biomes_list%", Translatable.of("toco_lore_banned_biomes_list").translate());
+            for (Structure.LoadedPair<Mechanic<?>,?> pair : structure.placeRequirements) {
+                if (pair.mechanic.id().equals(Mechanics.BIOME)) {
+                    StringList stringList = (StringList) pair.configValue;
+                    for (String biome : stringList.configItems) {
+                        list.add(replaceSingleLine(line, "%biome%", biome));
+                    }
+                }
+            }
+        } else {
+            return List.of(line);
         }
+
         return list;
     }
+
+    private String replaceSingleLine(String line, String s, String tocoLoreBannedBiomes) {
+        return line.replaceFirst(s, tocoLoreBannedBiomes);
+    }
+
 }

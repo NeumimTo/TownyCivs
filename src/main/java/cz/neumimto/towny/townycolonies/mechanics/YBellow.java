@@ -15,6 +15,11 @@ class YBellow implements Mechanic<DoubleWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.Y_BELLOW;
+    }
+
+    @Override
     public DoubleWrapper getNew() {
         return new DoubleWrapper();
     }

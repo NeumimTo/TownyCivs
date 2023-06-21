@@ -8,6 +8,8 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.*;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
+import cz.neumimto.towny.townycolonies.db.Database;
+import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.gui.api.GuiCommand;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
 import cz.neumimto.towny.townycolonies.model.Region;
@@ -103,7 +105,9 @@ public class RegionGui extends TCGui {
                 return;
             }
 
+            Storage.scheduleSave(region.loadedStructure);
             display((Player) e.getWhoClicked(), region);
+
         })));
 
         ItemStack delete = new ItemStack(Material.BARRIER);

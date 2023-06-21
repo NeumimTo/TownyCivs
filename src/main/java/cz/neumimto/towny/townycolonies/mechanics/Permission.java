@@ -15,6 +15,11 @@ class Permission implements Mechanic<StringWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.PERMISSION;
+    }
+
+    @Override
     public StringWrapper getNew() {
         return new StringWrapper();
     }

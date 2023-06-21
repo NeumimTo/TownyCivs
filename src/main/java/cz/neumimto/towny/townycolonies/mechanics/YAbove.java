@@ -15,6 +15,11 @@ class YAbove implements Mechanic<DoubleWrapper> {
     }
 
     @Override
+    public String id() {
+        return Mechanics.Y_ABOVE;
+    }
+
+    @Override
     public DoubleWrapper getNew() {
         return new DoubleWrapper();
     }
