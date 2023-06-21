@@ -56,3 +56,12 @@ Tested on:
   - Ability to place blueprint
 
 Both permission should be given to town co/mayor/assistant
+
+## Dev Roadmap
+
+- Add more default blueprints
+- SQL storage
+- Add warehouses and item filters via Item Frames
+- Convoys and trade routes between towns/outposts 
+- Option to spawn an immobilized NPC within a structure region instead of placing a container chest 
+- Create a new war system that is based around raiding town supplies, stealing town production and attacking trade routes
