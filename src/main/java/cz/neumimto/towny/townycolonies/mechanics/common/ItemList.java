@@ -35,10 +35,15 @@ public class ItemList implements Wrapper {
         @Optional
         public Integer fuel;
 
-        public ItemStack toItemStack() {
-            var itemStack = new ItemStack(Material.matchMaterial(material), amount);
+        private ItemStack cache;
 
-            itemStack.editMeta(itemMeta -> {
+        public ItemStack toItemStack() {
+            if (cache != null) {
+                return cache;
+            }
+            cache = new ItemStack(Material.matchMaterial(material), amount == null ? 1 : amount);
+
+            cache.editMeta(itemMeta -> {
                 if (customModelData != null) {
                     itemMeta.setCustomModelData(customModelData);
                 }
@@ -46,7 +51,7 @@ public class ItemList implements Wrapper {
                     itemMeta.displayName(MiniMessage.miniMessage().deserialize(customName));
                 }
             });
-            return itemStack;
+            return cache;
         }
     }
 

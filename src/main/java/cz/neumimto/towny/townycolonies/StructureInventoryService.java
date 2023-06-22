@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies;
 
 import com.palmergames.bukkit.towny.object.Town;
+import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -20,8 +21,8 @@ public class StructureInventoryService {
 
     private record StructAndInv(UUID structureId, Inventory inventory){};
 
-    private static Map<UUID, UUID> structsAndPlayers = new ConcurrentHashMap();
-    private static Map<UUID, StructAndInv> playersAndInv = new ConcurrentHashMap();
+    private static Map<UUID, UUID> structsAndPlayers = new ConcurrentHashMap<>();
+    private static Map<UUID, StructAndInv> playersAndInv = new ConcurrentHashMap<>();
     private static Map<UUID, Inventory> structsAndInv = new ConcurrentHashMap<>();
 
     public void openInventory(Player player, LoadedStructure structure) {
@@ -87,20 +88,54 @@ public class StructureInventoryService {
         return structsAndPlayers.get(structure.uuid);
     }
 
-    public boolean upkeep(Town town, LoadedStructure loadedStructure, Set<ItemStack> upkeep) {
-        Inventory inv = structsAndInv.get(loadedStructure.uuid);
-        if (inv == null) {
-            return false;
-        }
-        for (ItemStack itemStack : upkeep) {
-            if (!inv.containsAtLeast(itemStack, itemStack.getAmount())) {
-                return false;
-            }
-        }
+    public void upkeep(TownContext townContext, Set<ItemStack> upkeep) {
 
+        UUID player = structsAndPlayers.get(townContext.loadedStructure.uuid);
+        if (player != null) {
+            Player vplayer = Bukkit.getPlayer(player);
+            TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(vplayer)
+                    .run(() -> {
+                        try {
+                            for (ItemStack itemStack : upkeep) {
+                                if (!vplayer.getOpenInventory().getTopInventory().containsAtLeast(itemStack, itemStack.getAmount())) {
+                                    townContext.cdlResult = false;
+                                    return;
+                                }
+                            }
+                            townContext.cdlResult = true;
+
+                        } finally {
+                            townContext.cdl.countDown();
+                        }
+                    },
+                    () -> {
+                        checkUpkeep(townContext, upkeep);
+                    });
+        } else {
+            checkUpkeep(townContext, upkeep);
+        }
+    }
+
+    private void checkUpkeep(TownContext townContext, Set<ItemStack> upkeep) {
+        Inventory inv = getStructureInventory(townContext.loadedStructure);
+        try {
+            for (ItemStack itemStack : upkeep) {
+                if (!inv.containsAtLeast(itemStack, itemStack.getAmount())) {
+                    townContext.cdlResult = false;
+                    return;
+                }
+            }
+            townContext.cdlResult = true;
+        } finally {
+            townContext.cdl.countDown();
+        }
+    }
+
+    public void upkeepProcess(LoadedStructure loadedStructure, Set<ItemStack> upkeep) {
+        Inventory inv = structsAndInv.get(loadedStructure.uuid);
         for (ItemStack itemStack : upkeep) {
+            //todo convert to fuel or damage tools
             inv.remove(itemStack);
         }
-        return true;
     }
 }

@@ -42,6 +42,7 @@ public class MechanicService {
         buyReq(injector.getInstance(MStructure.class));
 
         prodReq(new Price());
+        prodReq(new ItemUpkeep());
 
         placeReq(new YBellow());
         placeReq(new YAbove());
@@ -50,6 +51,7 @@ public class MechanicService {
         placeReq(injector.getInstance(MStructure.class));
 
         prodMech(new ItemProduction());
+
 
         Bukkit.getPluginManager().callEvent(new RegisterMechanicEvent(this));
     }

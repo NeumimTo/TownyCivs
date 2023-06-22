@@ -7,6 +7,8 @@ import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.CountDownLatch;
+
 public class TownContext {
     public Town town;
     public Resident resident;
@@ -17,4 +19,6 @@ public class TownContext {
     public Location structureCenterLocation;
 
     public LoadedStructure loadedStructure;
+    public CountDownLatch cdl;
+    public boolean cdlResult;
 }

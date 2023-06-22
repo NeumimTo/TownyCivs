@@ -3,7 +3,7 @@ package cz.neumimto.towny.townycolonies.mechanics;
 public interface Mechanics {
 
     String ITEM_PRODUCTION = "item";
-    String UPKEEP = "upkeep";
+    String UPKEEP = "item_upkeep";
     String STRUCTURE = "structure";
     String PERMISSION = "permission";
     String PRICE = "price";
