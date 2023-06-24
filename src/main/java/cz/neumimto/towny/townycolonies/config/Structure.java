@@ -69,6 +69,9 @@ public class Structure {
     @Conversion(Production.class)
     public List<LoadedPair<Mechanic<Object>,Object>> production;
 
+    @Path("InventorySize")
+    public int inventorySize;
+
     public static class Area {
         public final int x;
         public final int z;

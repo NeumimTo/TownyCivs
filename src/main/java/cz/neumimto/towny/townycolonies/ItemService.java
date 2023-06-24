@@ -1,20 +1,24 @@
 package cz.neumimto.towny.townycolonies;
 
-import com.palmergames.bukkit.towny.object.Translatable;
+import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
 
 @Singleton
 public class ItemService {
+
+    @Inject
+    private ConfigurationService configurationService;
+    private final NamespacedKey blockerKey = new NamespacedKey(TownyColonies.INSTANCE, "iblocker");
 
     public static ItemStack getTownAdministrationTool() {
         ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
@@ -97,4 +101,25 @@ public class ItemService {
     public enum StructureTool {
         EDIT_TOOL, TOWN_TOOL
     }
+
+    public ItemStack getInventoryBlocker() {
+        var is = new ItemStack(configurationService.config.inventoryBlockerMaterial, 1);
+        is.editMeta(itemMeta -> {
+            itemMeta.setCustomModelData(configurationService.config.inventoryBlockerCustomModelData);
+            itemMeta.displayName(Component.empty());
+            itemMeta.getPersistentDataContainer().set(blockerKey, PersistentDataType.INTEGER, 1);
+        });
+        return is;
+    }
+
+    public boolean isInventoryBlocker(ItemStack itemStack) {
+        if (itemStack.getType() != configurationService.config.inventoryBlockerMaterial) {
+            return false;
+        }
+        if (itemStack.getItemMeta() == null) {
+            return false;
+        }
+        return itemStack.getItemMeta().getPersistentDataContainer().has(blockerKey);
+    }
+
 }

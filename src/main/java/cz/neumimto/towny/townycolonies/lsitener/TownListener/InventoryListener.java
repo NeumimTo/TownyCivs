@@ -1,9 +1,11 @@
 package cz.neumimto.towny.townycolonies.lsitener.TownListener;
 
+import com.github.stefvanschie.inventoryframework.gui.type.StonecutterGui;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import com.palmergames.bukkit.towny.object.WorldCoord;
+import cz.neumimto.towny.townycolonies.ItemService;
 import cz.neumimto.towny.townycolonies.StructureInventoryService;
 import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.SubclaimService;
@@ -16,10 +18,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -40,6 +46,9 @@ public class InventoryListener implements Listener {
     @Inject
     private SubclaimService sus;
 
+    @Inject
+    private ItemService itemService;
+
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player p) {
@@ -49,9 +58,12 @@ public class InventoryListener implements Listener {
 
     @EventHandler
     public void onInventoryOpen(PlayerInteractEvent event) {
-        int i = 0;
-        Player player = (Player) event.getPlayer();
-        if (event.getClickedBlock() != null && event.getClickedBlock().getType() == Material.CHEST) {
+        Player player = event.getPlayer();
+        if (event.getClickedBlock() != null
+                && (event.getClickedBlock().getType() == Material.CHEST
+                    || event.getClickedBlock().getType() == Material.BARREL
+                    || event.getClickedBlock().getType() == Material.TRAPPED_CHEST
+        )) {
             Location location = event.getClickedBlock().getLocation();
 
             Resident resident = TownyUniverse.getInstance().getResident(player.getUniqueId());
@@ -75,6 +87,17 @@ public class InventoryListener implements Listener {
 
             LoadedStructure structure = structureAt.get();
             sis.openInventory(player, structure);
+        }
+    }
+
+    @EventHandler
+    public void onItemClick(InventoryClickEvent event) {
+        ItemStack currentItem = event.getCurrentItem();
+        if (currentItem == null ) {
+            return;
+        }
+        if (itemService.isInventoryBlocker(currentItem)) {
+            event.setCancelled(true);
         }
     }
 }

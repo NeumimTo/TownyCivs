@@ -1,7 +1,5 @@
 package cz.neumimto.towny.townycolonies.db;
 
-import com.electronwill.nightconfig.core.Config;
-import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
@@ -12,12 +10,10 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 
 public final class Flatfile implements IStorage {
@@ -43,12 +39,14 @@ public final class Flatfile implements IStorage {
         yaml.set("center", structure.center);
         yaml.set("editMode", structure.editMode.get());
         yaml.set("lastTickTime", structure.lastTickTime);
+        yaml.set("inventory", null);
         try {
             yaml.save(storage.resolve(structure.uuid.toString() + ".yml").toFile());
         } catch (IOException e) {
             TownyColonies.logger.log(Level.SEVERE, "Could not save structure " + structure.uuid, e);
         }
     }
+
 
     @Override
     public void remove(UUID uuid) {

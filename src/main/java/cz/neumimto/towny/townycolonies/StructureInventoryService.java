@@ -1,6 +1,7 @@
 package cz.neumimto.towny.townycolonies;
 
 import com.palmergames.bukkit.towny.object.Town;
+import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.mechanics.TownContext;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import net.kyori.adventure.text.Component;
@@ -9,11 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -24,6 +23,9 @@ public class StructureInventoryService {
     private static Map<UUID, UUID> structsAndPlayers = new ConcurrentHashMap<>();
     private static Map<UUID, StructAndInv> playersAndInv = new ConcurrentHashMap<>();
     private static Map<UUID, Inventory> structsAndInv = new ConcurrentHashMap<>();
+
+    @Inject
+    private ItemService itemService;
 
     public void openInventory(Player player, LoadedStructure structure) {
         structsAndPlayers.put(structure.uuid, player.getUniqueId());
@@ -60,14 +62,19 @@ public class StructureInventoryService {
     private Inventory getStructureInventory(LoadedStructure loadedStructure) {
         Inventory inventory = structsAndInv.get(loadedStructure.uuid);
         if (inventory == null) {
-            inventory = createStructureInventory(loadedStructure);
-            structsAndInv.put(loadedStructure.uuid, inventory);
+            inventory = loadStructureInventory(loadedStructure, new ItemStack[0]);
         }
         return inventory;
     }
 
     private Inventory createStructureInventory(LoadedStructure structure) {
-        return Bukkit.getServer().createInventory(null, 27, Component.text(structure.structureDef.name));
+        Inventory inventory = Bukkit.getServer().createInventory(null, 27, Component.text(structure.structureDef.name));
+        if (structure.structureDef.inventorySize > 0) {
+            for (int i = structure.structureDef.inventorySize; i < inventory.getSize(); i++) {
+                inventory.setItem(i, itemService.getInventoryBlocker());
+            }
+        }
+        return inventory;
     }
 
     public List<ItemStack> getStructureInventoryContent(LoadedStructure structure) {
@@ -78,10 +85,11 @@ public class StructureInventoryService {
         return List.of(contents);
     }
 
-    public void loadStructureInventory(LoadedStructure structure, ItemStack[] itemStacks) {
+    public Inventory loadStructureInventory(LoadedStructure structure, ItemStack[] itemStacks) {
         Inventory structureInventory = createStructureInventory(structure);
         structureInventory.addItem(itemStacks);
         structsAndInv.put(structure.uuid, structureInventory);
+        return structureInventory;
     }
 
     public UUID getPlayerViewingInventory(LoadedStructure structure) {
@@ -137,5 +145,9 @@ public class StructureInventoryService {
             //todo convert to fuel or damage tools
             inv.remove(itemStack);
         }
+    }
+
+    public void saveInventory(LoadedStructure loadedStructure) {
+
     }
 }

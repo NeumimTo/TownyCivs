@@ -15,14 +15,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @NotThreadSafe
 public class LoadedStructure {
 
-    public final UUID uuid; //threadsafe
+    public final UUID uuid; 
 
-    public final UUID town; //threadsafe
+    public final UUID town; 
 
-    public final String structureId; //threadsafe
-    public final Location center; //threadsafe
+    public final String structureId; 
+    public final Location center; 
 
-    public final transient Structure structureDef; //threadsafe
+    public final transient Structure structureDef; 
 
     public final AtomicBoolean editMode;
 

@@ -1,6 +1,8 @@
 package cz.neumimto.towny.townycolonies.config;
 
+import com.electronwill.nightconfig.core.conversion.Conversion;
 import com.electronwill.nightconfig.core.conversion.Path;
+import org.bukkit.Material;
 
 import java.util.List;
 
@@ -9,11 +11,12 @@ public class PluginConfig {
     @Path("copy_defaults")
     public boolean copyDefaults;
 
-    @Path("blueprint_lore_desc_template")
-    public String blueprintLoreDescTemplate;
+    @Path("inventory_blocker_material")
+    @Conversion(Structure.MaterialConversion.class)
+    public Material inventoryBlockerMaterial;
 
-    @Path("blueprint_lore_template")
-    public List<String> blueprintLoreTemplate;
+    @Path("inventory_blocker_custom_model_data")
+    public Integer inventoryBlockerCustomModelData;
 
     @Path("storage")
     public String storage;
