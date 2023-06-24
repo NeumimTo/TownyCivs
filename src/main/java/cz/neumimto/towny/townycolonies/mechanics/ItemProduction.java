@@ -30,7 +30,7 @@ public class ItemProduction implements Mechanic<ItemList> {
             itemStackSet.add(itemStack);
         }
 
-        TownyColonies.injector.getInstance(StructureInventoryService.class).addItemProduction(townContext.town, townContext.loadedStructure, itemStackSet);
+        TownyColonies.injector.getInstance(StructureInventoryService.class).addItemProduction(townContext.loadedStructure, itemStackSet);
     }
 
 

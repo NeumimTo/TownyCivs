@@ -16,6 +16,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -42,6 +43,9 @@ public class ManagementService {
 
     @Inject
     private FolliaScheduler structureScheduler;
+
+    @Inject
+    private StructureInventoryService structureInventoryService;
 
 
     public EditSession startNewEditSession(Player player, Structure structure, Location location) {
@@ -200,7 +204,14 @@ public class ManagementService {
 
         Collection<Material> materials = Materials.getMaterials("tc:container");
         Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
+        for (Block block : map) {
+            if (block.getType() == Material.CHEST
+                    || block.getType() == Material.TRAPPED_CHEST
+                    || block.getType() == Material.BARREL) {
 
+                loadedStructure.inventory.put(block.getLocation(), structureInventoryService.loadStructureInventory(loadedStructure, location, new ItemStack[0]));
+            }
+        }
         subclaimService.registerRegion(lreg, loadedStructure);
 
         structureService.addToTown(town, loadedStructure);

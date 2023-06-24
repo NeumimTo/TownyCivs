@@ -86,7 +86,7 @@ public class InventoryListener implements Listener {
             }
 
             LoadedStructure structure = structureAt.get();
-            sis.openInventory(player, structure);
+            sis.openInventory(player, location, structure);
         }
     }
 

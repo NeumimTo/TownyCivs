@@ -39,9 +39,12 @@ public final class Flatfile implements IStorage {
         yaml.set("center", structure.center);
         yaml.set("editMode", structure.editMode.get());
         yaml.set("lastTickTime", structure.lastTickTime);
-        yaml.set("inventory", null);
+        YamlConfiguration inv = new YamlConfiguration();
+        inv.set("location", null);
+        inv.set("content", null);
+        yaml.set("inventory", inv);
         try {
-            yaml.save(storage.resolve(structure.uuid.toString() + ".yml").toFile());
+            yaml.save(storage.resolve(structure.uuid + ".yml").toFile());
         } catch (IOException e) {
             TownyColonies.logger.log(Level.SEVERE, "Could not save structure " + structure.uuid, e);
         }
