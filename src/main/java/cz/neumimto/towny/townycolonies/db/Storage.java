@@ -4,7 +4,6 @@ import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 
 import java.util.Collection;
-import java.util.Objects;
 
 public class Storage {
 

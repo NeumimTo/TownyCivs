@@ -154,7 +154,7 @@ public class SubclaimService {
             for (int z = (int) bb.getMinZ(); z < bb.getMaxZ(); z++) {
                 for (int y = (int) bb.getMinY(); y < bb.getMaxY(); y++) {
                     Block blockAt = world.getBlockAt(x, y, z);
-                    map.merge(blockAt.getType(),1, Integer::sum);
+                    map.merge(blockAt.getType(), 1, Integer::sum);
                 }
             }
         }

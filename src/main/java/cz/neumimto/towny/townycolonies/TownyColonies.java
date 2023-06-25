@@ -23,11 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,27 +36,19 @@ public class TownyColonies extends JavaPlugin {
     public static TownyColonies INSTANCE;
 
     public static Injector injector;
-
+    public static MorePaperLib MORE_PAPER_LIB;
     private static BukkitTask task;
-
     public boolean reloading;
-
     @Inject
     public ConfigurationService configurationService;
-
     @Inject
     public FolliaScheduler structureScheduler;
-
     @Inject
     public StructureService structureService;
-
     @Inject
     public MechanicService mechanicService;
-
     @Inject
     private ItemService itemService;
-
-    public static MorePaperLib MORE_PAPER_LIB;
 
     public TownyColonies() {
         super();
@@ -145,7 +135,6 @@ public class TownyColonies extends JavaPlugin {
         reloading = true;
         getLogger().info("TownyColonies started");
     }
-
 
 
     @Override

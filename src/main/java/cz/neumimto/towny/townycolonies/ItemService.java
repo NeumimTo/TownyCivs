@@ -16,9 +16,9 @@ import javax.inject.Singleton;
 @Singleton
 public class ItemService {
 
+    private final NamespacedKey blockerKey = new NamespacedKey(TownyColonies.INSTANCE, "iblocker");
     @Inject
     private ConfigurationService configurationService;
-    private final NamespacedKey blockerKey = new NamespacedKey(TownyColonies.INSTANCE, "iblocker");
 
     public static ItemStack getTownAdministrationTool() {
         ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
@@ -89,6 +89,7 @@ public class ItemService {
 
     /**
      * Called from async
+     *
      * @param key
      * @param value
      * @return
@@ -96,10 +97,6 @@ public class ItemService {
     public ItemStack toItemStack(String key, Integer value) {
         Material material = Material.matchMaterial(key);
         return new ItemStack(material, value);
-    }
-
-    public enum StructureTool {
-        EDIT_TOOL, TOWN_TOOL
     }
 
     public ItemStack getInventoryBlocker() {
@@ -120,6 +117,10 @@ public class ItemService {
             return false;
         }
         return itemStack.getItemMeta().getPersistentDataContainer().has(blockerKey);
+    }
+
+    public enum StructureTool {
+        EDIT_TOOL, TOWN_TOOL
     }
 
 }

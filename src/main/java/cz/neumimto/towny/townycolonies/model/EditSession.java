@@ -8,13 +8,13 @@ import java.util.Set;
 import java.util.UUID;
 
 public class EditSession {
-    public Structure structure;
-    public Location center;
-
-    public Set<Location> currentStructureBorder = new HashSet<>();
-    public Set<Location> overlappintStructureBorder = new HashSet<>();
 
     public final UUID uuid;
+
+    public Structure structure;
+    public Location center;
+    public Set<Location> currentStructureBorder = new HashSet<>();
+    public Set<Location> overlappintStructureBorder = new HashSet<>();
 
     public EditSession(Structure structure, Location location) {
         this.uuid = UUID.randomUUID();

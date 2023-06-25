@@ -5,7 +5,6 @@ import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
-import cz.neumimto.towny.townycolonies.db.Database;
 import cz.neumimto.towny.townycolonies.db.Flatfile;
 import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
@@ -51,7 +50,7 @@ public class StructureService {
 
 
     public Collection<LoadedStructure> getAllStructures(Town town) {
-        return structures.values().stream().filter(a->a.town.equals(town.getUUID())).collect(Collectors.toSet());
+        return structures.values().stream().filter(a -> a.town.equals(town.getUUID())).collect(Collectors.toSet());
     }
 
     public ItemStack toItemStack(Structure structure, int count) {
@@ -152,7 +151,7 @@ public class StructureService {
         Set<LoadedStructure> set = ConcurrentHashMap.newKeySet();
         set.add(loadedStructure);
 
-        structuresByTown.merge(loadedStructure.town, set, (a,b) ->{
+        structuresByTown.merge(loadedStructure.town, set, (a, b) -> {
             a.addAll(b);
             return a;
         });
@@ -166,13 +165,13 @@ public class StructureService {
         Collection<UUID> towns = TownyAPI.getInstance().getTowns().stream().map(Town::getUUID).collect(Collectors.toSet());
         loaded.stream()
                 .filter(a -> a.structureDef != null)
-                .filter(a->towns.contains(a.town))
+                .filter(a -> towns.contains(a.town))
                 .peek(a -> {
                     if (a.editMode.get()) {
                         managementService.structuresBeingEdited.add(a.uuid);
                     }
                 })
-                .peek(a-> subclaimService.createRegion(a).ifPresent(b->subclaimService.registerRegion(b,a)))
+                .peek(a -> subclaimService.createRegion(a).ifPresent(b -> subclaimService.registerRegion(b, a)))
                 .forEach(a -> {
                     Town town = TownyAPI.getInstance().getTown(a.town);
                     addToTown(town, a);

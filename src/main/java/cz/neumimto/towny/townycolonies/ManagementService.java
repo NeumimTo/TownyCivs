@@ -6,10 +6,11 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.db.Storage;
-import cz.neumimto.towny.townycolonies.model.*;
+import cz.neumimto.towny.townycolonies.model.EditSession;
+import cz.neumimto.towny.townycolonies.model.LoadedStructure;
+import cz.neumimto.towny.townycolonies.model.Region;
 import cz.neumimto.towny.townycolonies.schedulers.FolliaScheduler;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -21,17 +22,12 @@ import org.bukkit.inventory.ItemStack;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Singleton
 public class ManagementService {
 
-    private Map<UUID, EditSession> editSessions = new HashMap<>();
-
-    private Map<Location, UUID> contaienrs = new HashMap<>();
-
     Set<UUID> structuresBeingEdited = new HashSet<>();
-
+    private Map<UUID, EditSession> editSessions = new HashMap<>();
     @Inject
     private StructureService structureService;
 

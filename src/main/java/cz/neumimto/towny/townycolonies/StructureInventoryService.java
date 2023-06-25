@@ -28,6 +28,57 @@ public class StructureInventoryService {
     @Inject
     private ItemService itemService;
 
+    private static void putToInventory(Inventory inventory, Set<ItemStack> itemStackSet, CountDownLatch cdl, Set<ItemStack> couldNotFit) {
+        try {
+            HashMap<Integer, ItemStack> map = inventory.addItem(itemStackSet.toArray(ItemStack[]::new));
+            couldNotFit.addAll(map.values());
+        } finally {
+            cdl.countDown();
+        }
+    }
+
+    private static void checkItemsForUpkeepAndWait(Inventory inventory1, Map<Material, AmountAndModel> fulfilled, CountDownLatch cdl) {
+        try {
+            checkItemsForUpkeep(inventory1, fulfilled);
+        } finally {
+            cdl.countDown();
+        }
+    }
+
+    private static void checkItemsForUpkeep(Inventory inventory1, Map<Material, AmountAndModel> fulfilled) {
+        for (ItemStack i : inventory1.getContents()) {
+            if (i == null) {
+                continue;
+            }
+
+            AmountAndModel amountAndModel = fulfilled.get(i.getType());
+            if (amountAndModel == null) {
+                continue;
+            }
+            Integer modelData = null;
+            ItemMeta itemMeta = i.getItemMeta();
+
+            if (itemMeta.hasCustomModelData()) {
+                modelData = itemMeta.getCustomModelData();
+            }
+
+            if (!Objects.equals(amountAndModel.model, modelData)) {
+                continue;
+            }
+
+            if (itemMeta instanceof Damageable d) {
+                if (d.getDamage() + 1 <= i.getType().getMaxDurability()) {
+                    fulfilled.remove(i.getType());
+                }
+            } else {
+                fulfilled.computeIfPresent(i.getType(), (material, a) -> {
+                    a.amount = a.amount - i.getAmount();
+                    return a.amount <= 0 ? null : a;
+                });
+            }
+        }
+    }
+
     public void openInventory(Player player, Location location, LoadedStructure structure) {
         structsAndPlayers.put(location, player.getUniqueId());
 
@@ -79,15 +130,6 @@ public class StructureInventoryService {
         }
     }
 
-    private static void putToInventory(Inventory inventory, Set<ItemStack> itemStackSet, CountDownLatch cdl, Set<ItemStack> couldNotFit) {
-        try {
-            HashMap<Integer, ItemStack> map = inventory.addItem(itemStackSet.toArray(ItemStack[]::new));
-            couldNotFit.addAll(map.values());
-        } finally {
-            cdl.countDown();
-        }
-    }
-
     private Inventory getStructureInventory(LoadedStructure loadedStructure, Location location) {
         Inventory inventory = loadedStructure.inventory.get(location);
         return inventory;
@@ -115,10 +157,17 @@ public class StructureInventoryService {
     }
 
     public boolean checkUpkeep(TownContext townContext, Set<ItemStack> upkeep) {
-        Map<ItemStack, Integer> fulfilled = new HashMap<>();
+        Map<Material, AmountAndModel> fulfilled = new HashMap<>();
 
         for (ItemStack itemStack : upkeep) {
-            fulfilled.put(itemStack, itemStack.getAmount());
+            ItemMeta itemMeta = itemStack.getItemMeta();
+            Integer model = null;
+            if (itemMeta != null) {
+                if (itemMeta.hasCustomModelData()) {
+                    model = itemMeta.getCustomModelData();
+                }
+            }
+            fulfilled.put(itemStack.getType(), new AmountAndModel(itemStack.getAmount(), model));
         }
 
         for (Map.Entry<Location, Inventory> e : townContext.loadedStructure.inventory.entrySet()) {
@@ -142,7 +191,7 @@ public class StructureInventoryService {
         return true;
     }
 
-    private void checkItemsForUpkeepAndWait(Player player, Inventory inventory1, Map<ItemStack, Integer> fulfilled) {
+    private void checkItemsForUpkeepAndWait(Player player, Inventory inventory1,Map<Material, AmountAndModel> fulfilled) {
         CountDownLatch cdl = new CountDownLatch(1);
         TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
                 .run(
@@ -153,27 +202,6 @@ public class StructureInventoryService {
             cdl.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             TownyColonies.logger.log(Level.WARNING, "Could not wait for lock checkItemsForUpkeepAndWait", e);
-        }
-    }
-
-    private static void checkItemsForUpkeepAndWait(Inventory inventory1, Map<ItemStack, Integer> fulfilled, CountDownLatch cdl) {
-        try {
-            checkItemsForUpkeep(inventory1, fulfilled);
-        } finally {
-            cdl.countDown();
-        }
-    }
-
-    private static void checkItemsForUpkeep(Inventory inventory1, Map<ItemStack, Integer> fulfilled) {
-        for (ItemStack i : inventory1.getContents()) {
-            //todo fix
-            fulfilled.computeIfPresent(i, (itemStack, integer) -> {
-                if (i == null) {
-                    return integer;
-                }
-                int remainingAmount = integer - i.getAmount();
-                return remainingAmount <= 0 ? null : remainingAmount;
-            });
         }
     }
 
@@ -289,7 +317,7 @@ public class StructureInventoryService {
     private record StructAndInv(UUID structureId, Inventory inventory, Location location) {
     }
 
-    private static class AmountAndModel{
+    private static class AmountAndModel {
         int amount;
         Integer model;
 

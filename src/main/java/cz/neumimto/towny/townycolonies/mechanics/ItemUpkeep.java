@@ -16,7 +16,7 @@ public class ItemUpkeep implements Mechanic<ItemList> {
 
 
         return TownyColonies.injector.getInstance(StructureInventoryService.class)
-                    .checkUpkeep(townContext, upkeep);
+                .checkUpkeep(townContext, upkeep);
 
     }
 

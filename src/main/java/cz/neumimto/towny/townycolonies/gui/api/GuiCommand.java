@@ -18,7 +18,7 @@ public class GuiCommand extends GuiItem {
         super(item, e -> {
             e.setCancelled(true);
             TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler((Entity) viewer)
-                            .run(() -> Bukkit.dispatchCommand(viewer, command), null);
+                    .run(() -> Bukkit.dispatchCommand(viewer, command), null);
         });
     }
 

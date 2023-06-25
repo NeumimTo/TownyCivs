@@ -23,12 +23,10 @@ import java.util.*;
 
 public abstract class ConfigurableGui {
 
+    static char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
     private final String fileName;
     private Path workingDir;
-
     private GuiConfig guiConfig;
-
-    static char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     public ConfigurableGui(String fileName, Path workingDir) {
         this.fileName = fileName;

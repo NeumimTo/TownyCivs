@@ -8,7 +8,6 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycolonies.*;
 import cz.neumimto.towny.townycolonies.config.ConfigurationService;
 import cz.neumimto.towny.townycolonies.config.Structure;
-import cz.neumimto.towny.townycolonies.db.Database;
 import cz.neumimto.towny.townycolonies.db.Storage;
 import cz.neumimto.towny.townycolonies.gui.api.GuiCommand;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
@@ -89,14 +88,14 @@ public class RegionGui extends TCGui {
             } else {
                 editModeS = "<green>Inactive<green>";
             }
-            itemMeta.displayName(mm.deserialize("<gold>Edit mode</gold> : " +editModeS));
+            itemMeta.displayName(mm.deserialize("<gold>Edit mode</gold> : " + editModeS));
 
             lore.add(Component.empty());
             lore.add(mm.deserialize("<red>Active<red><white>- structure is disabled & its region may be edited</white>"));
             lore.add(mm.deserialize("<green>Inactive<green><white>- structure is enabled & its region may not be edited</white>"));
             itemMeta.lore(lore);
         });
-        map.put("EditModeToggle", List.of(new GuiCommand(editMode, e->{
+        map.put("EditModeToggle", List.of(new GuiCommand(editMode, e -> {
             e.setCancelled(true);
             boolean prev = managementService.isBeingEdited(region.loadedStructure);
             managementService.toggleEditMode(region.loadedStructure, (Player) e.getWhoClicked());
@@ -114,8 +113,8 @@ public class RegionGui extends TCGui {
         delete.editMeta(itemMeta -> {
             itemMeta.displayName(mm.deserialize("<red>Delete</red>"));
         });
-        map.put("Delete", List.of(new GuiCommand(delete, e->{
-            structureService.delete(region, (Player)e.getWhoClicked());
+        map.put("Delete", List.of(new GuiCommand(delete, e -> {
+            structureService.delete(region, (Player) e.getWhoClicked());
             e.setCancelled(true);
             player.getOpenInventory().close();
         })));
@@ -126,7 +125,7 @@ public class RegionGui extends TCGui {
             itemMeta.displayName(mm.deserialize("<yellow>Remaining build requirements</yellow>"));
             itemMeta.addItemFlags(ItemFlag.values());
         });
-        map.put("RemainingBlocks", List.of(new GuiCommand(remBlocks, e ->{
+        map.put("RemainingBlocks", List.of(new GuiCommand(remBlocks, e -> {
             e.setCancelled(true);
             ChestGui chestGui = remainingBlocksGui(region);
             chestGui.show(e.getWhoClicked());
@@ -158,7 +157,7 @@ public class RegionGui extends TCGui {
                     String group = key.substring(3);
                     Integer req = requirements.get(key);
                     int current = req - remaining;
-                    itemMeta.displayName(mm.deserialize(group + " - " + current + "/"+req+"x"));
+                    itemMeta.displayName(mm.deserialize(group + " - " + current + "/" + req + "x"));
                     BundleMeta bundleMeta = (BundleMeta) itemMeta;
 
                     Collection<Material> blockGroup = Materials.getMaterials(key);
@@ -168,23 +167,23 @@ public class RegionGui extends TCGui {
                 });
                 staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
             } else if (key.startsWith("!tc:")) {
-                    if (remaining == 0) {
-                        continue;
-                    }
-                    ItemStack itemStack = new ItemStack(Material.BUNDLE);
-                    itemStack.editMeta(itemMeta -> {
-                        String group = key.substring(4);
-                        Integer req = requirements.get(key);
-                        int current = req - remaining;
-                        itemMeta.displayName(mm.deserialize(group + " " + current+ "/ exactly " + req + "x"));
-                        BundleMeta bundleMeta = (BundleMeta) itemMeta;
+                if (remaining == 0) {
+                    continue;
+                }
+                ItemStack itemStack = new ItemStack(Material.BUNDLE);
+                itemStack.editMeta(itemMeta -> {
+                    String group = key.substring(4);
+                    Integer req = requirements.get(key);
+                    int current = req - remaining;
+                    itemMeta.displayName(mm.deserialize(group + " " + current + "/ exactly " + req + "x"));
+                    BundleMeta bundleMeta = (BundleMeta) itemMeta;
 
-                        Collection<Material> blockGroup = Materials.getMaterials(key.substring(1));
-                        for (Material material : blockGroup) {
-                            bundleMeta.addItem(new ItemStack(material));
-                        }
-                    });
-                    staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
+                    Collection<Material> blockGroup = Materials.getMaterials(key.substring(1));
+                    for (Material material : blockGroup) {
+                        bundleMeta.addItem(new ItemStack(material));
+                    }
+                });
+                staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
             } else {
                 if (remaining <= 0) {
                     continue;
@@ -194,9 +193,9 @@ public class RegionGui extends TCGui {
                 itemStack.editMeta(itemMeta -> {
                     Integer req = requirements.get(key);
                     int current = req - remaining;
-                    itemMeta.displayName(mm.deserialize(material.name() + " - " + current + "/"+req+"x"));
+                    itemMeta.displayName(mm.deserialize(material.name() + " - " + current + "/" + req + "x"));
                 });
-                staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)),x,y);
+                staticPane.addItem(new GuiItem(itemStack, ice -> ice.setCancelled(true)), x, y);
             }
             x++;
             if (x == 8) {

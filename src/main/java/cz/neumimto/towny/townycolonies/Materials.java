@@ -51,7 +51,7 @@ public class Materials {
                     });
                     Set<Material> m = new HashSet<>();
                     m.add(material);
-                    materialsByTag.merge(group, m, (a,b)->{
+                    materialsByTag.merge(group, m, (a, b) -> {
                         a.addAll(b);
                         return a;
                     });

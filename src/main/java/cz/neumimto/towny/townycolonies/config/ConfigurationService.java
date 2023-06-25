@@ -15,10 +15,8 @@ import cz.neumimto.towny.townycolonies.model.BlueprintItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import javax.inject.Singleton;
 import java.io.IOException;
@@ -78,6 +76,7 @@ public class ConfigurationService {
     public Collection<Structure> getAll() {
         return structures.values();
     }
+
     public void load(Path path) throws IOException {
         structures.clear();
         Path structures = path.resolve("structures");
@@ -152,9 +151,9 @@ public class ConfigurationService {
         for (String line : structure.description) {
             List<String> expanded = expandLine(line, structure);
             for (String s : expanded) {
-                s = replaceSingleLine(s,"%toco_lore_tickrate%", Translatable.of("toco_lore_tickrate").translate());
-                s = replaceSingleLine(s,"%toco_lore_production%", Translatable.of("toco_lore_production").translate());
-                s = replaceSingleLine(s,"%toco_lore_banned_biomes%", Translatable.of("toco_lore_banned_biomes").translate());
+                s = replaceSingleLine(s, "%toco_lore_tickrate%", Translatable.of("toco_lore_tickrate").translate());
+                s = replaceSingleLine(s, "%toco_lore_production%", Translatable.of("toco_lore_production").translate());
+                s = replaceSingleLine(s, "%toco_lore_banned_biomes%", Translatable.of("toco_lore_banned_biomes").translate());
                 s = replaceSingleLine(s, "%tickrate%", String.valueOf(structure.period));
                 s = replaceSingleLine(s, "%maxcount%", String.valueOf(structure.maxCount));
                 list.add(mm.deserialize(s));
@@ -193,7 +192,7 @@ public class ConfigurationService {
                 return Collections.emptyList();
             }
             line = replaceSingleLine(line, "%toco_lore_banned_biomes_list%", Translatable.of("toco_lore_banned_biomes_list").translate());
-            for (Structure.LoadedPair<Mechanic<?>,?> pair : structure.placeRequirements) {
+            for (Structure.LoadedPair<Mechanic<?>, ?> pair : structure.placeRequirements) {
                 if (pair.mechanic.id().equals(Mechanics.BIOME)) {
                     StringList stringList = (StringList) pair.configValue;
                     for (String biome : stringList.configItems) {

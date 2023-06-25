@@ -1,15 +1,11 @@
 package cz.neumimto.towny.townycolonies.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.palmergames.bukkit.towny.TownyAPI;
-import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycolonies.ItemService;
 import cz.neumimto.towny.townycolonies.TownyColonies;
-import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.api.GuiCommand;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
-import cz.neumimto.towny.townycolonies.model.StructureAndCount;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,7 +15,6 @@ import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Singleton
 public class HelpMenu1Gui extends TCGui {

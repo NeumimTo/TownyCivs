@@ -15,7 +15,7 @@ class MStructure implements Mechanic<StringWrapper> {
         return structureService.getAllStructuresByTown()
                 .values()
                 .stream()
-                .anyMatch(a -> a.stream().anyMatch(l->l.structureId.contains(configContext.value)));
+                .anyMatch(a -> a.stream().anyMatch(l -> l.structureId.contains(configContext.value)));
     }
 
     @Override

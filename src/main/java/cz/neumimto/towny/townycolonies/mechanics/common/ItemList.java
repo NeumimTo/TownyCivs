@@ -14,6 +14,11 @@ public class ItemList implements Wrapper {
     @Path("Items")
     public List<ConfigItem> configItems = new ArrayList<>();
 
+    @Override
+    public boolean isObject() {
+        return true;
+    }
+
     public static class ConfigItem {
 
         @Path("Material")
@@ -53,10 +58,5 @@ public class ItemList implements Wrapper {
             });
             return cache;
         }
-    }
-
-    @Override
-    public boolean isObject() {
-        return true;
     }
 }

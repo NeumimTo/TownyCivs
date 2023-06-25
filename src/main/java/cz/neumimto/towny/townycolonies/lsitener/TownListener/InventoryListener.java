@@ -1,6 +1,5 @@
 package cz.neumimto.towny.townycolonies.lsitener.TownListener;
 
-import com.github.stefvanschie.inventoryframework.gui.type.StonecutterGui;
 import com.palmergames.bukkit.towny.TownyUniverse;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.TownBlock;
@@ -9,30 +8,20 @@ import cz.neumimto.towny.townycolonies.ItemService;
 import cz.neumimto.towny.townycolonies.StructureInventoryService;
 import cz.neumimto.towny.townycolonies.StructureService;
 import cz.neumimto.towny.townycolonies.SubclaimService;
-import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.model.LoadedStructure;
-import cz.neumimto.towny.townycolonies.model.Region;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class InventoryListener implements Listener {
@@ -61,8 +50,8 @@ public class InventoryListener implements Listener {
         Player player = event.getPlayer();
         if (event.getClickedBlock() != null
                 && (event.getClickedBlock().getType() == Material.CHEST
-                    || event.getClickedBlock().getType() == Material.BARREL
-                    || event.getClickedBlock().getType() == Material.TRAPPED_CHEST
+                || event.getClickedBlock().getType() == Material.BARREL
+                || event.getClickedBlock().getType() == Material.TRAPPED_CHEST
         )) {
             Location location = event.getClickedBlock().getLocation();
 
@@ -93,7 +82,7 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onItemClick(InventoryClickEvent event) {
         ItemStack currentItem = event.getCurrentItem();
-        if (currentItem == null ) {
+        if (currentItem == null) {
             return;
         }
         if (itemService.isInventoryBlocker(currentItem)) {

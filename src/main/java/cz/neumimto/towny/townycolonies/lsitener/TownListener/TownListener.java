@@ -11,12 +11,10 @@ import cz.neumimto.towny.townycolonies.config.Structure;
 import cz.neumimto.towny.townycolonies.gui.BlueprintsGui;
 import cz.neumimto.towny.townycolonies.gui.RegionGui;
 import cz.neumimto.towny.townycolonies.model.BlueprintItem;
-import cz.neumimto.towny.townycolonies.model.LoadedStructure;
 import cz.neumimto.towny.townycolonies.model.Region;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -35,7 +33,6 @@ import org.bukkit.inventory.ItemStack;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Optional;
-import java.util.UUID;
 
 @Singleton
 public class TownListener implements Listener {

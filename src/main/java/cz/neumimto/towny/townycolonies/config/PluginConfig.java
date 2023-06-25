@@ -4,8 +4,6 @@ import com.electronwill.nightconfig.core.conversion.Conversion;
 import com.electronwill.nightconfig.core.conversion.Path;
 import org.bukkit.Material;
 
-import java.util.List;
-
 public class PluginConfig {
 
     @Path("copy_defaults")

@@ -18,8 +18,6 @@ import org.bukkit.event.Listener;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 @Singleton
@@ -60,7 +58,7 @@ public class FolliaScheduler implements Runnable, Listener {
                         Player player = Bukkit.getPlayer(playerViewingInventory);
                         TownyColonies.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
                                 .run(() -> handleTick(structure, townContext),
-                                     () -> TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext)));
+                                        () -> TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext)));
                     } else {
                         TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext));
                     }
@@ -86,8 +84,8 @@ public class FolliaScheduler implements Runnable, Listener {
             m.mechanic.postAction(ctx, m.configValue);
         }
 
-        List<Structure.LoadedPair<Mechanic<Object>,Object>> production = structure.structureDef.production;
-        for (Structure.LoadedPair<Mechanic<Object>,Object> m : production) {
+        List<Structure.LoadedPair<Mechanic<Object>, Object>> production = structure.structureDef.production;
+        for (Structure.LoadedPair<Mechanic<Object>, Object> m : production) {
             m.mechanic.postAction(ctx, m.configValue);
         }
 

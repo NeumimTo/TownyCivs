@@ -1,7 +1,6 @@
 package cz.neumimto.towny.townycolonies.db;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownySettings;
 import com.palmergames.bukkit.towny.db.TownyDataSource;
@@ -15,11 +14,12 @@ import org.bukkit.Location;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public final class Database implements IStorage {
@@ -35,6 +35,32 @@ public final class Database implements IStorage {
 
     @Inject
     private ConfigurationService configurationService;
+
+    private static int schemaVersion() {
+        try {
+            Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
+            String sql = queryFromFile("townycolonies_checkversion.sql");
+            try (var statement = connection.prepareStatement(sql)) {
+                try (var rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt("version");
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            return 0;
+        }
+        return 0;
+    }
+
+    private static String queryFromFile(String fileName) {
+        try (InputStream is = TownyColonies.class.getClassLoader().getResourceAsStream(fileName)) {
+            return new String(is.readAllBytes()).replaceAll("%prefix%", prefix);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void init() {
@@ -63,24 +89,6 @@ public final class Database implements IStorage {
         }
         save_sql = queryFromFile("townycolonies_insert.sql");
         all_structures_sql = queryFromFile("townycolonies_all_structures.sql");
-    }
-
-    private static int schemaVersion() {
-        try {
-            Connection connection = ((TownySQLSource) TownyAPI.getInstance().getDataSource()).getHikariDataSource().getConnection();
-            String sql = queryFromFile("townycolonies_checkversion.sql");
-            try (var statement = connection.prepareStatement(sql)) {
-                try (var rs = statement.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt("version");
-                    }
-                }
-            }
-
-        } catch (SQLException e) {
-            return 0;
-        }
-        return 0;
     }
 
     @Override
@@ -118,15 +126,6 @@ public final class Database implements IStorage {
         }
         return set;
     }
-
-    private static String queryFromFile(String fileName) {
-        try (InputStream is = TownyColonies.class.getClassLoader().getResourceAsStream(fileName)) {
-            return new String(is.readAllBytes()).replaceAll("%prefix%", prefix);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     @Override
     public void save(LoadedStructure structure) {

@@ -6,8 +6,8 @@ import com.electronwill.nightconfig.core.conversion.Converter;
 import com.electronwill.nightconfig.core.conversion.ObjectConverter;
 import com.electronwill.nightconfig.core.conversion.Path;
 import cz.neumimto.towny.townycolonies.TownyColonies;
-import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.mechanics.Mechanic;
+import cz.neumimto.towny.townycolonies.mechanics.MechanicService;
 import cz.neumimto.towny.townycolonies.mechanics.common.Wrapper;
 import org.bukkit.Material;
 
@@ -67,7 +67,7 @@ public class Structure {
 
     @Path("Production")
     @Conversion(Production.class)
-    public List<LoadedPair<Mechanic<Object>,Object>> production;
+    public List<LoadedPair<Mechanic<Object>, Object>> production;
 
     @Path("InventorySize")
     public int inventorySize;

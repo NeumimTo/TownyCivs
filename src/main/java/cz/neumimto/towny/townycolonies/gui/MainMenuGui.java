@@ -1,7 +1,6 @@
 package cz.neumimto.towny.townycolonies.gui;
 
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.palmergames.bukkit.towny.TownyUniverse;
 import cz.neumimto.towny.townycolonies.TownyColonies;
 import cz.neumimto.towny.townycolonies.gui.api.GuiConfig;
 import org.bukkit.command.CommandSender;

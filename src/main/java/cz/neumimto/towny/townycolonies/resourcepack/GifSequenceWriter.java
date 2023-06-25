@@ -28,6 +28,18 @@ public class GifSequenceWriter implements Closeable {
         writer.prepareWriteSequence(null);
     }
 
+    private static IIOMetadataNode getNode(IIOMetadataNode rootNode, String nodeName) {
+        int nNodes = rootNode.getLength();
+        for (int i = 0; i < nNodes; i++) {
+            if (rootNode.item(i).getNodeName().equalsIgnoreCase(nodeName)) {
+                return (IIOMetadataNode) rootNode.item(i);
+            }
+        }
+        IIOMetadataNode node = new IIOMetadataNode(nodeName);
+        rootNode.appendChild(node);
+        return (node);
+    }
+
     private void configureRootMetadata(int delay, boolean loop) throws IIOInvalidTreeException {
         String metaFormatName = metadata.getNativeMetadataFormatName();
         IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree(metaFormatName);
@@ -48,18 +60,6 @@ public class GifSequenceWriter implements Closeable {
         child.setUserObject(new byte[]{0x1, (byte) (loopContinuously & 0xFF), (byte) ((loopContinuously >> 8) & 0xFF)});
         appExtensionsNode.appendChild(child);
         metadata.setFromTree(metaFormatName, root);
-    }
-
-    private static IIOMetadataNode getNode(IIOMetadataNode rootNode, String nodeName) {
-        int nNodes = rootNode.getLength();
-        for (int i = 0; i < nNodes; i++) {
-            if (rootNode.item(i).getNodeName().equalsIgnoreCase(nodeName)) {
-                return (IIOMetadataNode) rootNode.item(i);
-            }
-        }
-        IIOMetadataNode node = new IIOMetadataNode(nodeName);
-        rootNode.appendChild(node);
-        return (node);
     }
 
     public void writeToSequence(RenderedImage img) throws IOException {
