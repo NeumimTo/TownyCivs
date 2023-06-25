@@ -1,5 +1,7 @@
 # TownyColonies
 
+[![Java CI with Gradle](https://github.com/NeumimTo/TownyColonies/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/NeumimTo/TownyColonies/actions/workflows/gradle.yml)
+
 Towny addon that adds automated farms, factories and administrative buildings into towny town & nation system
 
 The plugin has been inspired by the mod minecolonies (hence its name) and plugin civs
