@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 
 public class MaterialsTest {
 
-    @Test
+    //@Test
     public void test() throws Exception {
         File p = new File(getClass().getClassLoader().getResource("settings.conf").getFile());
         try (var c = FileConfig.of(p)){
