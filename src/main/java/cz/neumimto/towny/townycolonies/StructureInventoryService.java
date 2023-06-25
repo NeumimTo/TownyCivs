@@ -25,8 +25,6 @@ public class StructureInventoryService {
 
     private static Map<Location, UUID> structsAndPlayers = new ConcurrentHashMap<>();
     private static Map<UUID, StructAndInv> playersAndInv = new ConcurrentHashMap<>();
-    private static Map<Location, Inventory> locationAndInv = new ConcurrentHashMap<>();
-
     @Inject
     private ItemService itemService;
 
@@ -91,10 +89,7 @@ public class StructureInventoryService {
     }
 
     private Inventory getStructureInventory(LoadedStructure loadedStructure, Location location) {
-        Inventory inventory = locationAndInv.get(location);
-        if (inventory == null) {
-            inventory = loadStructureInventory(loadedStructure, location, new ItemStack[0]);
-        }
+        Inventory inventory = loadedStructure.inventory.get(location);
         return inventory;
     }
 
@@ -111,7 +106,7 @@ public class StructureInventoryService {
     public Inventory loadStructureInventory(LoadedStructure structure, Location location, ItemStack[] itemStacks) {
         Inventory structureInventory = createStructureInventory(structure);
         structureInventory.addItem(itemStacks);
-        locationAndInv.put(location, structureInventory);
+        structure.inventory.put(location, structureInventory);
         return structureInventory;
     }
 
@@ -281,6 +276,14 @@ public class StructureInventoryService {
 
     }
 
+    public boolean anyInventoryIsBeingAccessed(LoadedStructure structure) {
+        for (Map.Entry<Location, Inventory> e : structure.inventory.entrySet()) {
+            if (structsAndPlayers.containsKey(e.getKey())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     private record StructAndInv(UUID structureId, Inventory inventory, Location location) {

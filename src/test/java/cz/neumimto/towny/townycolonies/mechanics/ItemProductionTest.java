@@ -30,14 +30,11 @@ public class ItemProductionTest {
     @BeforeAll
     public static void prepareMock() {
         server = MockBukkit.mock();
-        MockBukkit.load(Vault.class);
-        MockBukkit.load(Towny.class);
-
+        MockBukkit.load(DummyPlugin.class);
     }
 
     @BeforeEach
     public void before() {
-        plugin = MockBukkit.load(TownyColonies.class);
         world = server.addSimpleWorld("test");
         location = new Location(world, 1, 1, 1);
         world.setBlockData(location, new BlockDataMock(Material.BARREL));

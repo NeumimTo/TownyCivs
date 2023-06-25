@@ -26,7 +26,9 @@ public class Storage {
     }
 
     public static void scheduleSave(LoadedStructure structure) {
-        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> impl.save(structure));
+        TownyColonies.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> {
+            impl.save(structure);
+        });
     }
 
     public static void scheduleRemove(LoadedStructure structure) {

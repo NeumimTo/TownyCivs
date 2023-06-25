@@ -17,10 +17,7 @@ import org.bukkit.event.Listener;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -36,6 +33,8 @@ public class FolliaScheduler implements Runnable, Listener {
 
     @Inject
     private StructureInventoryService inventoryService;
+
+    private Set<UUID> forceSaveNextTick = new HashSet<>();
 
     @Override
     public void run() {
@@ -93,8 +92,14 @@ public class FolliaScheduler implements Runnable, Listener {
         }
 
         structure.unsavedTickCount++;
-        if (structure.unsavedTickCount % structure.structureDef.saveEachNTicks == 0) {
-            Storage.scheduleSave(structure);
+        if (structure.unsavedTickCount % structure.structureDef.saveEachNTicks == 0 || forceSaveNextTick.contains(structure.uuid)) {
+            if (!inventoryService.anyInventoryIsBeingAccessed(structure)) {
+                Storage.scheduleSave(structure);
+                structure.unsavedTickCount = 0;
+                forceSaveNextTick.remove(structure.uuid);
+            } else {
+                forceSaveNextTick.add(structure.uuid);
+            }
         }
     }
 }
