@@ -45,12 +45,15 @@ public class StructureInventoryService {
         }
     }
 
-    private static void checkItemsForUpkeep(Inventory inventory1, Map<Material, AmountAndModel> fulfilled) {
+    private void checkItemsForUpkeep(Inventory inventory1, Map<Material, AmountAndModel> fulfilled) {
+        ItemStack inventoryBlocker = itemService.getInventoryBlocker();
         for (ItemStack i : inventory1.getContents()) {
             if (i == null) {
                 continue;
             }
-
+            if (i.equals(inventoryBlocker)) {
+                break;
+            }
             AmountAndModel amountAndModel = fulfilled.get(i.getType());
             if (amountAndModel == null) {
                 continue;
