@@ -1,6 +1,6 @@
-name: TownyColonies
+name: Townycivs
 version: '${version}'
-main: cz.neumimto.towny.townycolonies.TownyColonies
+main: cz.neumimto.towny.townycivs.TownyCivs
 depend: [ Towny ]
 authors: [ NeumimTo ]
 api-version: 1.19

@@ -1,1 +1,1 @@
-select * from %prefix%townycolonies_structure;
+select * from %prefix%townycivs_structure;

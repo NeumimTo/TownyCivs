@@ -1,1 +1,1 @@
-select version from %prefix%townycolonies_version;
+select version from %prefix%townycivs_version;

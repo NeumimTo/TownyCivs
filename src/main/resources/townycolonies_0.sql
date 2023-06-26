@@ -1,8 +1,8 @@
-create table %prefix%townycolonies_version (
+create table %prefix%townycivs_version (
     version int not null
 );
 --split
-create table %prefix%townycolonies_structure (
+create table %prefix%townycivs_structure (
     structure_uuid varchar(36) not null,
     town_uuid varchar(36) not null,
     last_tick_time bigint not null,
@@ -14,4 +14,4 @@ create table %prefix%townycolonies_structure (
     primary key(structure_uuid)
 );
 --split
-insert into %prefix%townycolonies_version values(1);
+insert into %prefix%townycivs_version values(1);

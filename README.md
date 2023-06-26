@@ -1,6 +1,6 @@
-# TownyColonies
+# Townycivs
 
-[![Java CI with Gradle](https://github.com/NeumimTo/TownyColonies/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/NeumimTo/TownyColonies/actions/workflows/gradle.yml)
+[![Java CI with Gradle](https://github.com/NeumimTo/Townycivs/actions/workflows/gradle.yml/badge.svg?branch=master)](https://github.com/NeumimTo/Townycivs/actions/workflows/gradle.yml)
 
 Towny addon that adds automated farms, factories and administrative buildings into towny town & nation system
 
@@ -20,7 +20,7 @@ Everything is configurable - you can (and you should) create your own blueprints
 For documentation check default config of cactus_farm.conf its all explained in comments
 
  - Region processing is done in an asychronous thread
- - Unlike civs TownyColonies wont load any addition chunks when distributing region production
+ - Unlike civs Townycivs wont load any addition chunks when distributing region production
 
 **Alphabuilds are not suitable for production env.**
 
@@ -36,7 +36,7 @@ Tested on:
 ## Building from source
 
 - `gradlew shadowJar`
-- The jar is then located in path `build/libs/townycolonies-{version}-all.jar`
+- The jar is then located in path `build/libs/townycivs-{version}-all.jar`
 
 ## Installation
 
@@ -51,10 +51,10 @@ Tested on:
 
 ## Permissions
 
-- Permission: `townycolonies.administrative`
+- Permission: `townycivs.administrative`
   - Ability to buy new blueprints
 
-- Permission: `townycolonies.architect`
+- Permission: `townycivs.architect`
   - Ability to place blueprint
 
 Both permission should be given to town co/mayor/assistant

@@ -1,1 +1,1 @@
-delete from %prefix%townycolonies_structure where structure_uuid = ?;
+delete from %prefix%townycivs_structure where structure_uuid = ?;
