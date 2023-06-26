@@ -37,7 +37,7 @@ public class StructureInventoryService {
         }
     }
 
-    private static void checkItemsForUpkeepAndWait(Inventory inventory1, Map<Material, AmountAndModel> fulfilled, CountDownLatch cdl) {
+    private void checkItemsForUpkeepAndWait(Inventory inventory1, Map<Material, AmountAndModel> fulfilled, CountDownLatch cdl) {
         try {
             checkItemsForUpkeep(inventory1, fulfilled);
         } finally {
