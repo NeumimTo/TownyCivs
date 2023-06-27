@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
-@CommandAlias("townycivs|toco|tco|toc")
+@CommandAlias("townycivs|toco|tco|toc|toci|tci")
 public class StructureCommands extends BaseCommand {
 
     @Inject

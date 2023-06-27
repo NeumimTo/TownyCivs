@@ -69,10 +69,7 @@ public class FolliaScheduler implements Runnable, Listener {
     }
 
     private void handleTick(LoadedStructure structure, TownContext ctx) {
-        TownyCivs.logger.log(Level.INFO, "Ticking region " + structure.structureDef.id);
-
         List<Structure.LoadedPair<Mechanic<Object>, Object>> upkeep = structure.structureDef.upkeep;
-
 
         for (Structure.LoadedPair<Mechanic<Object>, Object> m : upkeep) {
             if (!m.mechanic.check(ctx, m.configValue)) {

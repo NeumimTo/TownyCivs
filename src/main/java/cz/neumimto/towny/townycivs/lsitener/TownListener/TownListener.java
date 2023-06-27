@@ -74,9 +74,9 @@ public class TownListener implements Listener {
             return;
         }
 
-        if (itemType == ItemService.StructureTool.EDIT_TOOL && event.getClickedBlock() != null) {
+        if (itemType == ItemService.StructureTool.EDIT_TOOL) {
             event.setCancelled(true);
-            handleEditToolInteraction(player, event.getClickedBlock());
+            handleEditToolInteraction(player, player.getLocation());
             return;
         }
 
@@ -97,8 +97,8 @@ public class TownListener implements Listener {
 
     }
 
-    private void handleEditToolInteraction(Player player, Block clickedBlock) {
-        Optional<Region> regionOptional = subclaimService.regionAt(clickedBlock.getLocation());
+    private void handleEditToolInteraction(Player player, Location location) {
+        Optional<Region> regionOptional = subclaimService.regionAt(location);
         if (regionOptional.isEmpty()) {
             MiniMessage miniMessage = MiniMessage.miniMessage();
             player.sendMessage(miniMessage.deserialize("<gold>[Townycivs]</gold> <red>No structure at clicked location</red>"));
@@ -111,7 +111,7 @@ public class TownListener implements Listener {
             return;
         }
 
-        WorldCoord worldCoord = WorldCoord.parseWorldCoord(clickedBlock);
+        WorldCoord worldCoord = WorldCoord.parseWorldCoord(location);
         if (worldCoord.getTownOrNull() != resTown) {
             MiniMessage miniMessage = MiniMessage.miniMessage();
             player.sendMessage(miniMessage.deserialize("<gold>[Townycivs]</gold> <red>No structure at clicked location</red>"));
