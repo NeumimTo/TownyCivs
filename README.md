@@ -4,7 +4,7 @@
 
 Towny addon that adds automated farms, factories and administrative buildings into towny town & nation system
 
-The plugin has been inspired by the mod minecolonies (hence its name) and plugin civs
+The plugin has been inspired by the mod minecolonies and plugin civs (hence its name) 
 
 Basic gameplay:
 
