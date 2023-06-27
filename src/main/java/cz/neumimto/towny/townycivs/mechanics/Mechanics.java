@@ -8,7 +8,7 @@ public interface Mechanics {
     String PERMISSION = "permission";
     String PRICE = "price";
     String TOWN_RANK = "town_level";
-    String TOWN_UPKEEP = "TOWN_UPKEEP";
+    String TOWN_UPKEEP = "town_upkeep";
     String WORLD = "world";
     String Y_ABOVE = "y_above";
     String Y_BELLOW = "y_above";

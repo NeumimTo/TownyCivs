@@ -288,6 +288,7 @@ public class StructureInventoryService {
                     inventory.getContents()[i] = null;
 
                 } else {
+                    content.setItemMeta(d);
                     fulfilled.remove(content.getType());
                 }
             } else {

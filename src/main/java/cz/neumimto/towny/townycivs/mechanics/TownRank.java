@@ -7,7 +7,6 @@ class TownRank implements Mechanic<DoubleWrapper> {
     @Override
     public boolean check(TownContext townContext, DoubleWrapper configContext) {
         return townContext.town.getLevel() >= configContext.value;
-
     }
 
     @Override

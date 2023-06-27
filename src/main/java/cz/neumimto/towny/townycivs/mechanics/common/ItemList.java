@@ -44,7 +44,7 @@ public class ItemList implements Wrapper {
 
         public ItemStack toItemStack() {
             if (cache != null) {
-                return cache;
+                return cache.clone();
             }
             cache = new ItemStack(Material.matchMaterial(material), amount == null ? 1 : amount);
 

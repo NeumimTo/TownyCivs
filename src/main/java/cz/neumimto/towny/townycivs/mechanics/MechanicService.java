@@ -44,6 +44,7 @@ public class MechanicService {
         prodReq(new Price());
         prodReq(new ItemUpkeep());
 
+        placeReq(new Permission());
         placeReq(new YBellow());
         placeReq(new YAbove());
         placeReq(new WorldReq());
