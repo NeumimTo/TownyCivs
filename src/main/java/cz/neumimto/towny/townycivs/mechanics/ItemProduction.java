@@ -18,6 +18,13 @@ public class ItemProduction implements Mechanic<ItemList> {
 
     @Override
     public boolean check(TownContext townContext, ItemList configContext) {
+        Set<ItemStack> itemStackSet = new HashSet<>();
+        for (ItemList.ConfigItem configItem : configContext.configItems) {
+            ItemStack itemStack = configItem.toItemStack();
+            itemStackSet.add(itemStack);
+        }
+
+        //todo TownyCivs.injector.getInstance(StructureInventoryService.class).canTakeProducedItems(townContext.loadedStructure, itemStackSet);
         return true;
     }
 

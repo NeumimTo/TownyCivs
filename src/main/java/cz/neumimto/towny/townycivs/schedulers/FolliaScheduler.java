@@ -80,6 +80,12 @@ public class FolliaScheduler implements Runnable, Listener {
             }
         }
 
+        for (Structure.LoadedPair<Mechanic<Object>, Object> m : structure.structureDef.production) {
+            if (!m.mechanic.check(ctx, m.configValue)) {
+                return;
+            }
+        }
+
         for (Structure.LoadedPair<Mechanic<Object>, Object> m : upkeep) {
             m.mechanic.postAction(ctx, m.configValue);
         }

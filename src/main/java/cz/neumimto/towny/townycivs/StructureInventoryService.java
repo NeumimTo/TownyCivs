@@ -283,10 +283,9 @@ public class StructureInventoryService {
             }
 
             if (itemMeta instanceof Damageable d) {
-                d.setDamage(d.getDamage() + 1);
+                d.setDamage(d.getDamage() + amountAndModel.amount);
                 if (d.getDamage() >= content.getType().getMaxDurability()) {
-                    inventory.getContents()[i] = null;
-
+                    inventory.setItem(i, null);
                 } else {
                     content.setItemMeta(d);
                     fulfilled.remove(content.getType());
@@ -299,7 +298,7 @@ public class StructureInventoryService {
                     fulfilled.remove(content.getType());
 
                 } else {
-                    inventory.getContents()[i] = null;
+                    inventory.setItem(i, null);
                     amountAndModel.amount -= amount;
                 }
 
@@ -316,7 +315,6 @@ public class StructureInventoryService {
         }
         return false;
     }
-
 
     private record StructAndInv(UUID structureId, Inventory inventory, Location location) {
     }
