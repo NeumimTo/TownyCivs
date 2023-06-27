@@ -17,11 +17,13 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+
 
 @Singleton
 public class ManagementService {
@@ -198,22 +200,35 @@ public class ManagementService {
 
         Region lreg = subclaimService.createRegion(loadedStructure).get();
 
-        Collection<Material> materials = Materials.getMaterials("tc:container");
-        Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
-        for (Block block : map) {
-            if (block.getType() == Material.CHEST
-                    || block.getType() == Material.TRAPPED_CHEST
-                    || block.getType() == Material.BARREL) {
-
-                loadedStructure.inventory.put(block.getLocation(), structureInventoryService.loadStructureInventory(loadedStructure, location, new ItemStack[0]));
-            }
-        }
+        refreshContainerLocations(loadedStructure, lreg);
         subclaimService.registerRegion(lreg, loadedStructure);
 
         structureService.addToTown(town, loadedStructure);
 
         TownyMessaging.sendPrefixedTownMessage(town, player.getName() + " placed " + structure.name + " at " + location.getBlockX() + ", " + location.getBlockY() + ", " + location.getBlockZ());
         Storage.scheduleSave(loadedStructure);
+    }
+
+    private void refreshContainerLocations(LoadedStructure loadedStructure, Region lreg) {
+        Collection<Material> materials = Materials.getMaterials("tc:container");
+
+        Collection<Block> map = subclaimService.blocksWithinRegion(materials, lreg);
+        Map<Location, Inventory> newLocs = new HashMap<>();
+        for (Block block : map) {
+            if (materials.contains(block.getType())) {
+                newLocs.put(block.getLocation(), loadedStructure.inventory.get(block.getLocation()));
+            }
+        }
+
+        loadedStructure.inventory.clear();
+
+        Iterator<Map.Entry<Location, Inventory>> iterator = newLocs.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Location, Inventory> next = iterator.next();
+            loadedStructure.inventory.put(next.getKey(),
+                    next.getValue() == null ? structureInventoryService.loadStructureInventory(loadedStructure, next.getKey(), new ItemStack[0]) : next.getValue());
+        }
+
     }
 
     public void toggleEditMode(LoadedStructure loadedStructure, Player player) {
@@ -231,6 +246,7 @@ public class ManagementService {
             Map<String, Integer> remainingBlocks = subclaimService.remainingBlocks(region);
             if (subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
                 structuresBeingEdited.remove(loadedStructure.uuid);
+                refreshContainerLocations(loadedStructure, region);
                 loadedStructure.editMode.set(false);
 
             } else {
