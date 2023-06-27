@@ -43,13 +43,7 @@ Tested on:
 - drop the jar into plugins folder
 - default configs might not be balanced to suit yours server economy
 
-- ~~If using towny SQL storage append sql database connection flags by `&allowMultiQueries=true`~~
-
-## Commands
-
-- Theres only one command - `/toco` - an entrypoint for opening an inventory menu 
-
-## Permissions
+### Permissions
 
 - Permission: `townycivs.administrative`
   - Ability to buy new blueprints
@@ -58,6 +52,10 @@ Tested on:
   - Ability to place blueprint
 
 Both permission should be given to town co/mayor/assistant
+
+## Commands
+
+- Theres only one command - `/toco` - an entrypoint for opening an inventory menu
 
 ## Dev Roadmap
 
