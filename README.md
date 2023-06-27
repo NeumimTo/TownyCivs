@@ -17,7 +17,7 @@ Basic gameplay:
 The main idea is to encourage and reward players to build actual buildings instead of making one large cobblestone house in the middle of their town.
 
 Everything is configurable - you can (and you should) create your own blueprints
-For documentation check default config of cactus_farm.conf its all explained in comments
+For documentation check wiki
 
  - Region processing is done in an asychronous thread
  - Unlike civs Townycivs wont load any addition chunks when distributing region production
