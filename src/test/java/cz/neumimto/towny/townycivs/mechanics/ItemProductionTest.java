@@ -3,15 +3,17 @@ package cz.neumimto.towny.townycivs.mechanics;
 import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.ServerMock;
 import be.seeseemelk.mockbukkit.block.data.BlockDataMock;
+import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 import cz.neumimto.towny.townycivs.TownyCivs;
 import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.mechanics.common.ItemList;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
+import net.milkbowl.vault.Vault;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +22,7 @@ import java.util.UUID;
 
 public class ItemProductionTest {
 
-    Townycivs plugin;
+    TownyCivs plugin;
 
     World world;
 
@@ -28,19 +30,24 @@ public class ItemProductionTest {
 
     private static ServerMock server;
 
-    @BeforeAll
-    public static void prepareMock() {
+    @Test
+    public void prepareMock() {
         server = MockBukkit.mock();
+        Vault vault = MockBukkit.load(Vault.class);
+        Assertions.assertNotNull(vault);
+        Towny towny = MockBukkit.load(Towny.class);
+        Assertions.assertNotNull(towny);
     }
 
-    @BeforeEach
+    //@BeforeEach
     public void before() {
         world = server.addSimpleWorld("test");
+
         location = new Location(world, 1, 1, 1);
         world.setBlockData(location, new BlockDataMock(Material.BARREL));
     }
 
-   // @Test
+    @Test
     public void loadedstructure_null_containers() {
 
         TownContext townContext = new TownContext();

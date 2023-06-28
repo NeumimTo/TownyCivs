@@ -1,12 +1,15 @@
 package cz.neumimto.towny.townycivs.lsitener.TownListener;
 
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.event.PreNewDayEvent;
 import com.palmergames.bukkit.towny.event.time.dailytaxes.PreTownPaysNationTaxEvent;
+import com.palmergames.bukkit.towny.listeners.TownyPaperEvents;
 import com.palmergames.bukkit.towny.object.Resident;
 import com.palmergames.bukkit.towny.object.Town;
 import com.palmergames.bukkit.towny.object.WorldCoord;
 import cz.neumimto.towny.townycivs.*;
 import cz.neumimto.towny.townycivs.config.ConfigurationService;
+import cz.neumimto.towny.townycivs.config.PluginConfig;
 import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.gui.BlueprintsGui;
 import cz.neumimto.towny.townycivs.gui.RegionGui;
@@ -27,6 +30,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -57,6 +61,21 @@ public class TownListener implements Listener {
 
     @Inject
     private RegionGui regionGui;
+
+    @Inject
+    private TownService townService;
+
+    @EventHandler
+    public void login(PlayerLoginEvent event) {
+
+    }
+
+    @EventHandler
+    public void newDayEvent(PreNewDayEvent event) {
+        if (configurationService.config.processingType == PluginConfig.ProcessingType.UNTIL_NEXT_DAY) {
+            townService.resetPlayerActivity();
+        }
+    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onTax(PreTownPaysNationTaxEvent event) {

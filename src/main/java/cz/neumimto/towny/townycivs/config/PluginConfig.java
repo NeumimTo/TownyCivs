@@ -46,6 +46,13 @@ public class PluginConfig {
     @Path("db_database")
     public String dbDatabase;
 
+    @Path("processing_type")
+    public ProcessingType processingType;
+
+    public static enum ProcessingType {
+        ALWAYS, UNTIL_NEXT_DAY,
+    }
+
     static class TownPointsConvertor implements Converter<Map, Config> {
 
         @Override
@@ -53,11 +60,11 @@ public class PluginConfig {
             Map map = new HashMap();
 
             if (value != null) {
-                SortedMap<Integer, Map<TownySettings.TownLevel, Object>> configTownLevel = TownySettings.getConfigTownLevel();
+                Map<Integer, TownySettings.TownLevel> configTownLevel = TownySettings.getConfigTownLevel();
                 Map<String, Object> stringObjectMap = value.valueMap();
                 for (Map.Entry<String, Object> e : stringObjectMap.entrySet()) {
                     configTownLevel.entrySet().stream()
-                            .filter(a-> matches(e.getKey(), a.getValue().get(TownySettings.TownLevel.NAME_POSTFIX), a.getValue().get(TownySettings.TownLevel.NAME_PREFIX)))
+                            .filter(a-> matches(e.getKey(), a.getValue().namePostfix(), a.getValue().namePrefix()))
                             .findFirst()
                             .ifPresent(a->{
                                 map.put(a.getKey(), Integer.parseInt(e.getValue().toString()));

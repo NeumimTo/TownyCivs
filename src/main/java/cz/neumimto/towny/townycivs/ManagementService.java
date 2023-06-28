@@ -3,6 +3,7 @@ package cz.neumimto.towny.townycivs;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
+import com.palmergames.bukkit.towny.object.Translatable;
 import cz.neumimto.towny.townycivs.config.ConfigurationService;
 import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.db.Storage;
@@ -10,7 +11,9 @@ import cz.neumimto.towny.townycivs.model.EditSession;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
 import cz.neumimto.towny.townycivs.model.Region;
 import cz.neumimto.towny.townycivs.schedulers.FolliaScheduler;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -45,6 +48,8 @@ public class ManagementService {
     @Inject
     private StructureInventoryService structureInventoryService;
 
+    @Inject
+    private TownService townService;
 
     public EditSession startNewEditSession(Player player, Structure structure, Location location) {
         var es = new EditSession(structure, location);
@@ -244,15 +249,25 @@ public class ManagementService {
 
             Region region = subclaimService.getRegion(loadedStructure);
             Map<String, Integer> remainingBlocks = subclaimService.remainingBlocks(region);
-            if (subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
-                structuresBeingEdited.remove(loadedStructure.uuid);
-                refreshContainerLocations(loadedStructure, region);
-                loadedStructure.editMode.set(false);
-
-            } else {
+            if (!subclaimService.noRemainingBlocks(remainingBlocks, loadedStructure)) {
                 MiniMessage miniMessage = MiniMessage.miniMessage();
-                player.sendMessage(miniMessage.deserialize("<gold>[Townycivs]</gold> <red>" + loadedStructure.structureDef.name + " do not meet its build requirements to be enabled.</red>"));
+                Component c = miniMessage.deserialize(Translatable.of("toco_error_missing_blocks").forLocale(player),
+                        Placeholder.component("name", Component.text(loadedStructure.structureDef.name)));
+                player.sendMessage(c);
+                return;
             }
+
+            if (!townService.hasPointsForStructure(town, loadedStructure.structureDef)) {
+                MiniMessage miniMessage = MiniMessage.miniMessage();
+                Component c = miniMessage.deserialize(Translatable.of("toco_error_missing_townpoints").forLocale(player),
+                        Placeholder.component("name", Component.text(loadedStructure.structureDef.name)));
+                player.sendMessage(c);
+                return;
+            }
+
+            structuresBeingEdited.remove(loadedStructure.uuid);
+            refreshContainerLocations(loadedStructure, region);
+            loadedStructure.editMode.set(false);
         }
     }
 

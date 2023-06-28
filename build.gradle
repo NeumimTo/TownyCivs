@@ -51,7 +51,7 @@ test {
 
 dependencies {
     compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
-    compileOnly 'com.palmergames.bukkit.towny:towny:0.98.1.0'
+    compileOnly 'com.palmergames.bukkit.towny:towny:0.99.2.5'
     compileOnly 'com.electronwill.night-config:hocon:3.6.5'
     compileOnly 'com.google.inject:guice:5.1.0'
 
@@ -66,7 +66,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
     testImplementation 'io.papermc.paper:paper-api:1.18.2-R0.1-SNAPSHOT'
     testImplementation 'com.github.seeseemelk:MockBukkit-v1.19:3.1.0'
-    testImplementation 'net.essentialsx:EssentialsX:2.20.0'
+    // testImplementation 'net.essentialsx:EssentialsX:2.20.0'
     testImplementation 'commons-lang:commons-lang:2.6'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.11.1'
 }
@@ -132,18 +132,18 @@ task dlPlugins {
         overwrite true
     }
     download.run {
-        src "https://github.com/TownyAdvanced/Towny/releases/download/0.98.3.0/Towny.Advanced.0.98.3.0.zip"
-        dest new File(new File(System.getProperty("java.io.tmpdir")), "Towny.zip")
+        src "https://github.com/TownyAdvanced/Towny/releases/download/0.99.2.5/towny-0.99.2.5.jar"
+        dest new File(pluginsFileDir, "Towny.jar")
         overwrite true
     }
 
-    copy {
-        from {
-            var path = System.getProperty("java.io.tmpdir") + "/Towny.zip"
-            zipTree(path).matching { include '**/*.jar' }.files
-        }
-        into pluginsDir.toFile()
-    }
+    //copy {
+    //    from {
+    //        var path = System.getProperty("java.io.tmpdir") + "/Towny.zip"
+    //        zipTree(path).matching { include '**/*.jar' }.files
+    //    }
+    //    into pluginsDir.toFile()
+    //}
 
     dependsOn preparePluginsDir
 }

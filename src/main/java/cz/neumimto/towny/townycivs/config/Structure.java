@@ -70,7 +70,7 @@ public class Structure {
     public int inventorySize;
 
     @Path("TownPointPrice")
-    public int TownPointPrice;
+    public int townPointPrice;
 
     public static class Area {
         public final int x;
