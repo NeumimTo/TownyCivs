@@ -7,18 +7,22 @@ import cz.neumimto.towny.townycivs.StructureService;
 import cz.neumimto.towny.townycivs.TownyCivs;
 import cz.neumimto.towny.townycivs.config.ConfigurationService;
 import cz.neumimto.towny.townycivs.config.Structure;
+import cz.neumimto.towny.townycivs.config.TMechanic;
 import cz.neumimto.towny.townycivs.db.Storage;
 import cz.neumimto.towny.townycivs.mechanics.Mechanic;
 import cz.neumimto.towny.townycivs.mechanics.TownContext;
+import cz.neumimto.towny.townycivs.mechanics.common.ItemList;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 @Singleton
 public class FolliaScheduler implements Runnable, Listener {
@@ -71,26 +75,19 @@ public class FolliaScheduler implements Runnable, Listener {
     private void handleTick(LoadedStructure structure, TownContext ctx) {
         List<Structure.LoadedPair<Mechanic<Object>, Object>> upkeep = structure.structureDef.upkeep;
 
-        for (Structure.LoadedPair<Mechanic<Object>, Object> m : upkeep) {
-            if (!m.mechanic.check(ctx, m.configValue)) {
-                return;
+        for (TMechanic tMechanic : structure.structureDef.onTick) {
+            Collection<ItemStack> input = items(tMechanic.input);
+            Collection<ItemStack> output = items(tMechanic.output);
+            Collection<ItemStack> reagent = items(tMechanic.reagent);
+
+            if (!reagent.isEmpty()) {
+                if (!inventoryService.contains(structure, reagent)) {
+                    return;
+                }
+
             }
         }
 
-        for (Structure.LoadedPair<Mechanic<Object>, Object> m : structure.structureDef.production) {
-            if (!m.mechanic.check(ctx, m.configValue)) {
-                return;
-            }
-        }
-
-        for (Structure.LoadedPair<Mechanic<Object>, Object> m : upkeep) {
-            m.mechanic.postAction(ctx, m.configValue);
-        }
-
-        List<Structure.LoadedPair<Mechanic<Object>, Object>> production = structure.structureDef.production;
-        for (Structure.LoadedPair<Mechanic<Object>, Object> m : production) {
-            m.mechanic.postAction(ctx, m.configValue);
-        }
 
         structure.unsavedTickCount++;
         if (structure.unsavedTickCount % structure.structureDef.saveEachNTicks == 0 || forceSaveNextTick.contains(structure.uuid)) {
@@ -102,5 +99,13 @@ public class FolliaScheduler implements Runnable, Listener {
                 forceSaveNextTick.add(structure.uuid);
             }
         }
+    }
+
+    private static Collection<ItemStack> items(List<ItemList.ConfigItem> tMechanic) {
+        Set<ItemStack> output = new HashSet<>();
+        if (tMechanic != null) {
+            output = tMechanic.stream().map(ItemList.ConfigItem::toItemStack).collect(Collectors.toSet());
+        }
+        return output;
     }
 }

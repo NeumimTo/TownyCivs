@@ -66,6 +66,9 @@ public class Structure {
     @Conversion(Production.class)
     public List<LoadedPair<Mechanic<Object>, Object>> production;
 
+    @Path("OnTick")
+    public List<TMechanic> onTick;
+
     @Path("InventorySize")
     public int inventorySize;
 
