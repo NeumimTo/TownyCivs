@@ -11,6 +11,8 @@ import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.gui.api.GuiCommand;
 import cz.neumimto.towny.townycivs.gui.api.GuiConfig;
 import cz.neumimto.towny.townycivs.mechanics.TownContext;
+import cz.neumimto.towny.townycivs.model.ActionResult;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -66,21 +68,29 @@ public class BlueprintsGui extends TCGui {
             townContext.player = player;
             townContext.structure = structure;
 
-            if (structureService.canBuy(townContext)) {
-                int buildCount = structureService.findTownStructureById(town, townContext.structure).count;
-                ItemStack itemStack = structureService.toItemStack(townContext.structure, buildCount);
-                list.add(new GuiCommand(itemStack, event -> {
-                    event.setCancelled(true);
-                    if (structureService.canBuy(townContext)) {
-                        ItemStack clone = structureService.buyBlueprint(townContext);
-                        HumanEntity whoClicked = event.getWhoClicked();
-                        HashMap<Integer, ItemStack> noFitItems = whoClicked.getInventory().addItem(clone);
-                        for (Map.Entry<Integer, ItemStack> entry : noFitItems.entrySet()) {
-                            whoClicked.getLocation().getWorld().dropItemNaturally(whoClicked.getLocation(), entry.getValue());
-                        }
+
+            int buildCount = structureService.findTownStructureById(town, townContext.structure).count;
+            ItemStack itemStack = structureService.toItemStack(townContext.structure, buildCount);
+            list.add(new GuiCommand(itemStack, event -> {
+                event.setCancelled(true);
+                ActionResult actionResult = structureService.checkBuyRequirements(player, town, structure);
+                if (actionResult.isOk()) {
+                    ItemStack clone = structureService.buyBlueprint(townContext);
+                    HumanEntity whoClicked = event.getWhoClicked();
+                    HashMap<Integer, ItemStack> noFitItems = whoClicked.getInventory().addItem(clone);
+                    for (Map.Entry<Integer, ItemStack> entry : noFitItems.entrySet()) {
+                        whoClicked.getLocation().getWorld().dropItemNaturally(whoClicked.getLocation(), entry.getValue());
                     }
-                }));
-            }
+                } else {
+                    if (player.getOpenInventory() != null) {
+                        player.getOpenInventory().close();
+                    }
+                    for (Component component : actionResult.msg()) {
+                        player.sendMessage(component);
+                    }
+                }
+            }));
+
         }
 
         map.put("Blueprint", list);

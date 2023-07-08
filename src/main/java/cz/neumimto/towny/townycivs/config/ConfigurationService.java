@@ -171,39 +171,13 @@ public class ConfigurationService {
         List<String> list = new ArrayList<>();
         if (line.contains("%toco_lore_production_list%")) {
             line = replaceSingleLine(line, "%toco_lore_production_list%", Translatable.of("toco_lore_production_list").translate());
-            for (Structure.LoadedPair<Mechanic<Object>, Object> l : structure.production) {
-                if (l.mechanic.id().equals(Mechanics.ITEM_PRODUCTION)) {
-                    ItemList itemList = (ItemList) l.configValue;
-                    for (ItemList.ConfigItem e : itemList.configItems) {
-                        String matName = e.customName;
-                        if (matName == null) {
-                            Material material = Material.matchMaterial(e.material);
-                            if (material != null) {
-                                matName = material.name();
-                            } else {
-                                matName = "UNKNOWN";
-                            }
-                        }
-                        int amount = e.amount;
-                        String matLine = replaceSingleLine(line, "%amount%", String.valueOf(amount));
-                        matLine = replaceSingleLine(matLine, "%item%", matName.substring(0, 1).toUpperCase() + matName.substring(1).replaceAll("_", " "));
-                        list.add(matLine);
-                    }
-                }
-            }
+
         } else if (line.contains("%toco_lore_banned_biomes_list%")) {
-            if (structure.placeRequirements == null || structure.placeRequirements.isEmpty()) {
+            if (structure.placeRequirements == null) {
                 return Collections.emptyList();
             }
             line = replaceSingleLine(line, "%toco_lore_banned_biomes_list%", Translatable.of("toco_lore_banned_biomes_list").translate());
-            for (Structure.LoadedPair<Mechanic<?>, ?> pair : structure.placeRequirements) {
-                if (pair.mechanic.id().equals(Mechanics.BIOME)) {
-                    StringList stringList = (StringList) pair.configValue;
-                    for (String biome : stringList.configItems) {
-                        list.add(replaceSingleLine(line, "%biome%", biome));
-                    }
-                }
-            }
+
         } else {
             return List.of(line);
         }

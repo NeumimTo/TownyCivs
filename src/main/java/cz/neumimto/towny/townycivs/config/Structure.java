@@ -2,10 +2,6 @@ package cz.neumimto.towny.townycivs.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.conversion.*;
-import cz.neumimto.towny.townycivs.TownyCivs;
-import cz.neumimto.towny.townycivs.mechanics.Mechanic;
-import cz.neumimto.towny.townycivs.mechanics.MechanicService;
-import cz.neumimto.towny.townycivs.mechanics.common.Wrapper;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -40,20 +36,10 @@ public class Structure {
     public Area area;
 
     @Path("BuyRequirements")
-    @Conversion(BuyReq.class)
-    public List<LoadedPair<Mechanic<?>, ?>> buyRequirements;
+    public BuyRequirements buyRequirements;
 
     @Path("PlaceRequirements")
-    @Conversion(BuyReq.class)
-    public List<LoadedPair<Mechanic<?>, ?>> placeRequirements;
-
-    @Path("BuildRequirements")
-    @Conversion(BuyReq.class)
-    public List<LoadedPair<Mechanic<?>, ?>> buildRequirements;
-
-    @Path("Upkeep")
-    @Conversion(Upkeep.class)
-    public List<LoadedPair<Mechanic<Object>, Object>> upkeep;
+    public PlaceRequirements placeRequirements;
 
     @Path("Blocks")
     @Conversion(Blocks.class)
@@ -62,11 +48,8 @@ public class Structure {
     @Path("SaveEachNTicks")
     public int saveEachNTicks;
 
-    @Path("Production")
-    @Conversion(Production.class)
-    public List<LoadedPair<Mechanic<Object>, Object>> production;
-
     @Path("OnTick")
+    @com.typesafe.config.Optional
     public List<TMechanic> onTick;
 
     @Path("InventorySize")
@@ -84,84 +67,6 @@ public class Structure {
             this.x = x;
             this.z = z;
             this.y = y;
-        }
-    }
-
-    public static class LoadedPair<M, C> {
-        public final C configValue;
-        public final Mechanic<C> mechanic;
-
-        public LoadedPair(C configValue, Mechanic<C> mechanic) {
-            this.configValue = configValue;
-            this.mechanic = mechanic;
-        }
-    }
-
-    public static class Production extends ConfiguredMechanic {
-        @Override
-        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
-            return service.prodMech(name);
-        }
-    }
-
-
-    public static class Upkeep extends ConfiguredMechanic {
-        @Override
-        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
-            return service.prodReq(name);
-        }
-    }
-
-    public static class BuyReq extends ConfiguredMechanic {
-        @Override
-        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
-            return service.buyReq(name);
-        }
-    }
-
-    public static class BuildReq extends ConfiguredMechanic {
-        @Override
-        protected Optional<Mechanic> mechanic(MechanicService service, String name) {
-            return service.placeReq(name);
-        }
-    }
-
-    public static abstract class ConfiguredMechanic implements Converter<List<?>, List<Config>> {
-
-        protected abstract Optional<Mechanic> mechanic(MechanicService service, String name);
-
-        @Override
-        public List convertToField(List<Config> value) {
-            List mechs = new ArrayList();
-            if (value == null) {
-                return mechs;
-            }
-            var registry = TownyCivs.injector.getInstance(MechanicService.class);
-
-            for (Config config : value) {
-                String mechanic = config.get("Mechanic");
-                Optional<Mechanic> mech = mechanic(registry, mechanic);
-                if (mech.isPresent()) {
-                    Mechanic m = mech.get();
-                    Object aNew = m.getNew();
-                    if (aNew instanceof Wrapper w) {
-                        if (w.isObject()) {
-                            new ObjectConverter().toObject(config.get("Value"), aNew);
-                            mechs.add(new LoadedPair<>(aNew, m));
-                            continue;
-                        }
-                    }
-                    new ObjectConverter().toObject(config, aNew);
-                    mechs.add(new LoadedPair<>(aNew, m));
-                }
-            }
-
-            return mechs;
-        }
-
-        @Override
-        public List convertFromField(List value) {
-            return null;
         }
     }
 

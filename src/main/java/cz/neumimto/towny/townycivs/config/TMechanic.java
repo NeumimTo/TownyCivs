@@ -1,21 +1,25 @@
 package cz.neumimto.towny.townycivs.config;
 
 import com.electronwill.nightconfig.core.conversion.Path;
-import cz.neumimto.towny.townycivs.mechanics.common.ItemList;
+import com.typesafe.config.Optional;
 
 import java.util.List;
 
 public class TMechanic {
 
     @Path("Reagent")
-    public List<ItemList.ConfigItem> reagent;
+    @Optional
+    public List<ConfigItem> reagent;
 
     @Path("ItemInput")
-    public List<ItemList.ConfigItem> input;
+    @Optional
+    public List<ConfigItem> input;
 
     @Path("ItemOutput")
-    public List<ItemList.ConfigItem> output;
+    @Optional
+    public List<ConfigItem> output;
 
-    @Path("Commandoutput")
+    @Path("CommandOutput")
+    @Optional
     public List<String> commands;
 }

@@ -3,18 +3,23 @@ package cz.neumimto.towny.townycivs;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.TownyMessaging;
 import com.palmergames.bukkit.towny.object.Town;
+import cz.neumimto.towny.townycivs.config.BuyRequirements;
 import cz.neumimto.towny.townycivs.config.ConfigurationService;
+import cz.neumimto.towny.townycivs.config.PlaceRequirements;
 import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.db.Flatfile;
 import cz.neumimto.towny.townycivs.db.Storage;
-import cz.neumimto.towny.townycivs.mechanics.Mechanic;
 import cz.neumimto.towny.townycivs.mechanics.TownContext;
+import cz.neumimto.towny.townycivs.model.ActionResult;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
 import cz.neumimto.towny.townycivs.model.Region;
 import cz.neumimto.towny.townycivs.model.StructureAndCount;
 import cz.neumimto.towny.townycivs.schedulers.FolliaScheduler;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -43,6 +48,8 @@ public class StructureService {
     @Inject
     private ManagementService managementService;
 
+    @Inject
+    private MessageService messageService;
 
     public Map<UUID, Set<LoadedStructure>> getAllStructuresByTown() {
         return structuresByTown;
@@ -113,12 +120,12 @@ public class StructureService {
     }
 
     public ItemStack buyBlueprint(TownContext townContext) {
-        for (Structure.LoadedPair<Mechanic<?>, ?> requirement : townContext.structure.buyRequirements) {
-            Object configValue = requirement.configValue;
-            var mechanic = (Mechanic<Object>) requirement.mechanic;
-            mechanic.postAction(townContext, configValue);
-            mechanic.okmessage(townContext, configValue);
+
+        if (townContext.structure.buyRequirements != null) {
+            townContext.town.getAccount().withdraw(townContext.structure.buyRequirements.price,
+                    "townycivs - bought " + townContext.structure.id);
         }
+        TownyMessaging.sendPrefixedTownMessage(townContext.town, townContext.player.getName() + " bought " + townContext.structure.name);
         return toBlueprintItemStack(townContext.structure);
     }
 
@@ -129,20 +136,6 @@ public class StructureService {
             itemMeta.setCustomModelData(structure.customModelData);
         });
         return itemStack;
-    }
-
-
-    public boolean canBuy(TownContext context) {
-        boolean pass = true;
-        for (Structure.LoadedPair<Mechanic<?>, ?> requirement : context.structure.buyRequirements) {
-            Object configValue = requirement.configValue;
-            var mechanic = (Mechanic<Object>) requirement.mechanic;
-            if (!mechanic.check(context, configValue)) {
-                mechanic.nokmessage(context, configValue);
-                pass = false;
-            }
-        }
-        return pass;
     }
 
     public void addToTown(Town town, LoadedStructure loadedStructure) {
@@ -193,5 +186,66 @@ public class StructureService {
 
     public Optional<LoadedStructure> findStructureByUUID(UUID uuid) {
         return Optional.ofNullable(structures.get(uuid));
+    }
+
+    public ActionResult checkBuyRequirements(Player player, Town town, Structure structure) {
+        BuyRequirements buyRequirements = structure.buyRequirements;
+        if (buyRequirements == null) {
+            return ActionResult.OK;
+        }
+
+        List<Component> errorMessages = new ArrayList<>();
+
+        for (String perm : buyRequirements.permission) {
+            if (!player.hasPermission(perm)) {
+                errorMessages.add(messageService.missingPermission(player));
+                break;
+            }
+        }
+
+        if (town.getAccount().getHoldingBalance() < buyRequirements.price) {
+            errorMessages.add(messageService.townBankNotEnoughFunds(player, structure, buyRequirements.price));
+        }
+
+        return ActionResult.of(errorMessages);
+    }
+
+    public ActionResult checkPlaceRequirements(Player player, Town town, Location location, Structure structure) {
+        PlaceRequirements placeRequirements = structure.placeRequirements;
+        if (placeRequirements == null) {
+            return ActionResult.OK;
+        }
+
+        List<Component> errorMessages = new ArrayList<>();
+        if (placeRequirements.aboveY != null && placeRequirements.aboveY < location.getBlockY()) {
+           errorMessages.add(messageService.errReqAboveY(player, structure));
+        }
+
+        if (placeRequirements.bellowY != null && placeRequirements.bellowY > location.getBlockY()) {
+            errorMessages.add(messageService.errReqBellowY(player, structure));
+        }
+
+        if (placeRequirements.biomeBlacklist != null) {
+            NamespacedKey biomeKey = Bukkit.getUnsafe().getBiomeKey(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            if (placeRequirements.biomeBlacklist.contains(biomeKey.asString())) {
+                errorMessages.add(messageService.notOnWhitelistedBiome(player, structure, biomeKey.asString()));
+            }
+        }
+
+        if (placeRequirements.biomeWhitelist != null) {
+            NamespacedKey biomeKey = Bukkit.getUnsafe().getBiomeKey(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+            if (!placeRequirements.biomeWhitelist.contains(biomeKey.asString())) {
+                errorMessages.add(messageService.notOnWhitelistedBiomes(player, structure, placeRequirements.biomeWhitelist));
+            }
+        }
+
+        for (String perm : placeRequirements.permission) {
+            if (!player.hasPermission(perm)) {
+                errorMessages.add(messageService.missingPermission(player));
+                break;
+            }
+        }
+
+        return ActionResult.of(errorMessages);
     }
 }

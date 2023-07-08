@@ -6,6 +6,7 @@ import be.seeseemelk.mockbukkit.block.data.BlockDataMock;
 import com.earth2me.essentials.Essentials;
 import com.palmergames.bukkit.towny.Towny;
 import cz.neumimto.towny.townycivs.TownyCivs;
+import cz.neumimto.towny.townycivs.config.ConfigItem;
 import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.mechanics.common.ItemList;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
@@ -14,7 +15,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class ItemProductionTest {
 
         ItemList itemList = new ItemList();
         itemList.configItems = new ArrayList<>();
-        itemList.configItems.add(new ItemList.ConfigItem() {{
+        itemList.configItems.add(new ConfigItem() {{
             material = Material.CACTUS.name();
             amount = 10;
         }});
@@ -85,7 +85,7 @@ public class ItemProductionTest {
 
         ItemList itemList = new ItemList();
         itemList.configItems = new ArrayList<>();
-        itemList.configItems.add(new ItemList.ConfigItem() {{
+        itemList.configItems.add(new ConfigItem() {{
             material = Material.CACTUS.name();
             amount = 10;
         }});

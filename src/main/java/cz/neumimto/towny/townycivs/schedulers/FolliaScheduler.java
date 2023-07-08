@@ -5,13 +5,11 @@ import com.palmergames.bukkit.towny.object.Town;
 import cz.neumimto.towny.townycivs.StructureInventoryService;
 import cz.neumimto.towny.townycivs.StructureService;
 import cz.neumimto.towny.townycivs.TownyCivs;
+import cz.neumimto.towny.townycivs.config.ConfigItem;
 import cz.neumimto.towny.townycivs.config.ConfigurationService;
-import cz.neumimto.towny.townycivs.config.Structure;
 import cz.neumimto.towny.townycivs.config.TMechanic;
 import cz.neumimto.towny.townycivs.db.Storage;
-import cz.neumimto.towny.townycivs.mechanics.Mechanic;
 import cz.neumimto.towny.townycivs.mechanics.TownContext;
-import cz.neumimto.towny.townycivs.mechanics.common.ItemList;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -21,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -73,7 +70,6 @@ public class FolliaScheduler implements Runnable, Listener {
     }
 
     private void handleTick(LoadedStructure structure, TownContext ctx) {
-        List<Structure.LoadedPair<Mechanic<Object>, Object>> upkeep = structure.structureDef.upkeep;
 
         for (TMechanic tMechanic : structure.structureDef.onTick) {
             Collection<ItemStack> input = items(tMechanic.input);
@@ -101,10 +97,10 @@ public class FolliaScheduler implements Runnable, Listener {
         }
     }
 
-    private static Collection<ItemStack> items(List<ItemList.ConfigItem> tMechanic) {
+    private static Collection<ItemStack> items(List<ConfigItem> tMechanic) {
         Set<ItemStack> output = new HashSet<>();
         if (tMechanic != null) {
-            output = tMechanic.stream().map(ItemList.ConfigItem::toItemStack).collect(Collectors.toSet());
+            output = tMechanic.stream().map(ConfigItem::toItemStack).collect(Collectors.toSet());
         }
         return output;
     }
