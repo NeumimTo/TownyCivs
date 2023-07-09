@@ -28,4 +28,8 @@ public class PlaceRequirements {
     @Optional
     public List<String> permission = new ArrayList<>();
 
+    @Path("Structures")
+    @Optional
+    public List<String> structures = new ArrayList<>();
+
 }

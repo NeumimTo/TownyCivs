@@ -2,6 +2,7 @@ package cz.neumimto.towny.townycivs.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.conversion.*;
+import com.typesafe.config.Optional;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -36,10 +37,12 @@ public class Structure {
     public Area area;
 
     @Path("BuyRequirements")
-    public BuyRequirements buyRequirements;
+    @Optional
+    public BuyRequirements buyRequirements = new BuyRequirements();
 
     @Path("PlaceRequirements")
-    public PlaceRequirements placeRequirements;
+    @Optional
+    public PlaceRequirements placeRequirements = new PlaceRequirements();
 
     @Path("Blocks")
     @Conversion(Blocks.class)
@@ -49,8 +52,8 @@ public class Structure {
     public int saveEachNTicks;
 
     @Path("OnTick")
-    @com.typesafe.config.Optional
-    public List<TMechanic> onTick;
+    @Optional
+    public List<TMechanic> onTick = new ArrayList<>();
 
     @Path("InventorySize")
     public int inventorySize;

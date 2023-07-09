@@ -1,5 +1,6 @@
 package cz.neumimto.towny.townycivs;
 
+import cz.neumimto.towny.townycivs.config.ConfigItem;
 import cz.neumimto.towny.townycivs.mechanics.TownContext;
 import cz.neumimto.towny.townycivs.model.LoadedStructure;
 import net.kyori.adventure.text.Component;
@@ -15,9 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 
 @Singleton
@@ -27,23 +26,6 @@ public class StructureInventoryService {
     private static Map<UUID, StructAndInv> playersAndInv = new ConcurrentHashMap<>();
     @Inject
     private ItemService itemService;
-
-    private static void putToInventory(Inventory inventory, Set<ItemStack> itemStackSet, CountDownLatch cdl, Set<ItemStack> couldNotFit) {
-        try {
-            HashMap<Integer, ItemStack> map = inventory.addItem(itemStackSet.toArray(ItemStack[]::new));
-            couldNotFit.addAll(map.values());
-        } finally {
-            cdl.countDown();
-        }
-    }
-
-    private void checkItemsForUpkeepAndWait(Inventory inventory1, Map<Material, AmountAndModel> fulfilled, CountDownLatch cdl) {
-        try {
-            checkItemsForUpkeep(inventory1, fulfilled);
-        } finally {
-            cdl.countDown();
-        }
-    }
 
     private void checkItemsForUpkeep(Inventory inventory1, Map<Material, AmountAndModel> fulfilled) {
         ItemStack inventoryBlocker = itemService.getInventoryBlocker();
@@ -99,37 +81,30 @@ public class StructureInventoryService {
         }
     }
 
-    public void addItemProduction(LoadedStructure loadedStructure, Set<ItemStack> itemStackSet) {
+    public void addItemProduction(LoadedStructure loadedStructure, Collection<ItemStack> itemStackSet) {
         Map<Location, Inventory> inventories = loadedStructure.inventory;
-        Set<ItemStack> remaining = new HashSet<>();
+
         for (Map.Entry<Location, Inventory> e : inventories.entrySet()) {
             UUID uuid = structsAndPlayers.get(e.getKey());
             Inventory inventory1 = e.getValue();
-            if (uuid != null) {
-                Player vplayer = Bukkit.getPlayer(uuid);
-                addItemProductionAndWait(vplayer, inventory1, itemStackSet, remaining);
 
-            } else {
-                HashMap<Integer, ItemStack> map = inventory1.addItem(itemStackSet.toArray(ItemStack[]::new));
-                remaining.addAll(map.values());
-            }
-            if (remaining.isEmpty()) {
+            CompletableFuture<Map<Integer, ItemStack>> future = new CompletableFuture<>();
+            future.completeOnTimeout(Collections.emptyMap(), 1500L, TimeUnit.MILLISECONDS);
+
+            Collection<ItemStack> itemStackSet2 = itemStackSet;
+
+            Runnable fn = () -> {
+                HashMap<Integer, ItemStack> remaining = inventory1.addItem(itemStackSet2.toArray(ItemStack[]::new));
+                future.complete(remaining);
+            };
+
+            Map<Integer, ItemStack> integerItemStackMap = waitForResult(uuid, future, fn);
+
+            if (integerItemStackMap.isEmpty()) {
                 break;
             }
-        }
-    }
 
-    private void addItemProductionAndWait(Player player, Inventory inventory, Set<ItemStack> itemStackSet, Set<ItemStack> couldNotFit) {
-        CountDownLatch cdl = new CountDownLatch(1);
-
-        TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
-                .run(() -> putToInventory(inventory, itemStackSet, cdl, couldNotFit),
-                        () -> putToInventory(inventory, itemStackSet, cdl, couldNotFit)
-                );
-        try {
-            cdl.await(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            TownyCivs.logger.log(Level.WARNING, "An error occurred while waiting for a lock. Could not process addItemProduction ", e);
+            itemStackSet = integerItemStackMap.values();
         }
     }
 
@@ -157,108 +132,6 @@ public class StructureInventoryService {
 
     public UUID getPlayerViewingInventory(LoadedStructure structure) {
         return structsAndPlayers.get(structure.uuid);
-    }
-
-    public boolean checkUpkeep(TownContext townContext, Set<ItemStack> upkeep) {
-        Map<Material, AmountAndModel> fulfilled = new HashMap<>();
-
-        for (ItemStack itemStack : upkeep) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            Integer model = null;
-            if (itemMeta != null) {
-                if (itemMeta.hasCustomModelData()) {
-                    model = itemMeta.getCustomModelData();
-                }
-            }
-            fulfilled.put(itemStack.getType(), new AmountAndModel(itemStack.getAmount(), model));
-        }
-
-        for (Map.Entry<Location, Inventory> e : townContext.loadedStructure.inventory.entrySet()) {
-            UUID uuid = structsAndPlayers.get(e.getKey());
-            Inventory inventory1 = e.getValue();
-
-
-            if (uuid != null) {
-                Player vplayer = Bukkit.getPlayer(uuid);
-                checkItemsForUpkeepAndWait(vplayer, inventory1, fulfilled);
-
-            } else {
-                checkItemsForUpkeep(inventory1, fulfilled);
-            }
-
-            if (!fulfilled.isEmpty()) {
-                return false;
-            }
-
-        }
-        return true;
-    }
-
-    private void checkItemsForUpkeepAndWait(Player player, Inventory inventory1,Map<Material, AmountAndModel> fulfilled) {
-        CountDownLatch cdl = new CountDownLatch(1);
-        TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
-                .run(
-                        () -> checkItemsForUpkeepAndWait(inventory1, fulfilled, cdl),
-                        () -> checkItemsForUpkeepAndWait(inventory1, fulfilled, cdl)
-                );
-        try {
-            cdl.await(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            TownyCivs.logger.log(Level.WARNING, "Could not wait for lock checkItemsForUpkeepAndWait", e);
-        }
-    }
-
-    public void processUpkeep(LoadedStructure loadedStructure, Set<ItemStack> upkeep) {
-        Map<Material, AmountAndModel> fulfilled = new HashMap<>();
-
-        for (ItemStack itemStack : upkeep) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            Integer model = null;
-            if (itemMeta != null) {
-                if (itemMeta.hasCustomModelData()) {
-                    model = itemMeta.getCustomModelData();
-                }
-            }
-            fulfilled.put(itemStack.getType(), new AmountAndModel(itemStack.getAmount(), model));
-        }
-
-        for (Map.Entry<Location, Inventory> e : loadedStructure.inventory.entrySet()) {
-            UUID uuid = structsAndPlayers.get(e.getKey());
-
-            Inventory inventory = e.getValue();
-
-            if (uuid != null) {
-                Player vplayer = Bukkit.getPlayer(uuid);
-
-                processUpkeepAndWait(vplayer, inventory, fulfilled);
-
-            } else {
-                processUpkeep(inventory, fulfilled);
-            }
-        }
-
-    }
-
-    private void processUpkeepAndWait(Player player, Inventory inventory, Map<Material, AmountAndModel> fulfilled) {
-        CountDownLatch cdl = new CountDownLatch(1);
-        TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
-                .run(
-                        () -> processUpkeepAndWait(inventory, fulfilled, cdl),
-                        () -> processUpkeepAndWait(inventory, fulfilled, cdl)
-                );
-        try {
-            cdl.await(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            TownyCivs.logger.log(Level.WARNING, "Could not wait for lock checkItemsForUpkeepAndWait", e);
-        }
-    }
-
-    private void processUpkeepAndWait(Inventory inventory, Map<Material, AmountAndModel> fulfilled, CountDownLatch cdl) {
-        try {
-            processUpkeep(inventory, fulfilled);
-        } finally {
-            cdl.countDown();
-        }
     }
 
     private void processUpkeep(Inventory inventory, Map<Material, AmountAndModel> fulfilled) {
@@ -307,6 +180,77 @@ public class StructureInventoryService {
 
     }
 
+    public boolean canTakeAtLeastOne(LoadedStructure loadedStructure, Collection<ItemStack> output) {
+
+        for (Map.Entry<Location, Inventory> e : loadedStructure.inventory.entrySet()) {
+            UUID uuid = structsAndPlayers.get(e.getKey());
+
+            Inventory inventory = e.getValue();
+
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeOnTimeout(false, 1500L, TimeUnit.MILLISECONDS);
+
+            Runnable fn = () -> {
+                for (ItemStack configItem : output) {
+                    future.complete(inventory.first(configItem) != -1);
+                }
+            };
+
+            if (waitForResult(uuid, future, fn)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean contains(LoadedStructure loadedStructure, Collection<ItemStack> list, boolean damageToolsOnly) {
+        for (Map.Entry<Location, Inventory> e : loadedStructure.inventory.entrySet()) {
+            UUID uuid = structsAndPlayers.get(e.getKey());
+
+            Inventory inventory = e.getValue();
+
+            CompletableFuture<Boolean> future = new CompletableFuture<>();
+            future.completeOnTimeout(false, 1500L, TimeUnit.MILLISECONDS);
+
+            Runnable fn = () -> {
+                ItemStack inventoryBlocker = itemService.getInventoryBlocker();
+                for (ItemStack i : inventory.getContents()) {
+                    if (i == null) {
+                        continue;
+                    }
+                    if (i.equals(inventoryBlocker)) {
+                        break;
+                    }
+                    for (ItemStack configItem : list) {
+                        //todo
+                    }
+                }
+                future.complete(false);
+            };
+
+            if (waitForResult(uuid, future, fn)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public <T> T waitForResult(UUID playerInv, CompletableFuture<T> future, Runnable fn) {
+        if (playerInv != null) {
+            Player vplayer = Bukkit.getPlayer(playerInv);
+
+            TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(vplayer)
+                    .run(fn, fn);
+
+        } else {
+            fn.run();
+        }
+
+        return future.join();
+    }
+
     public boolean anyInventoryIsBeingAccessed(LoadedStructure structure) {
         for (Map.Entry<Location, Inventory> e : structure.inventory.entrySet()) {
             if (structsAndPlayers.containsKey(e.getKey())) {
@@ -314,6 +258,10 @@ public class StructureInventoryService {
             }
         }
         return false;
+    }
+
+    public void takeItems(LoadedStructure structure, Collection<ItemStack> items, boolean damageToolsOnly) {
+
     }
 
     private record StructAndInv(UUID structureId, Inventory inventory, Location location) {

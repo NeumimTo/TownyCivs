@@ -48,21 +48,14 @@ public class FolliaScheduler implements Runnable, Listener {
                 if (structure.nextTickTime <= System.currentTimeMillis()
                         && !structure.editMode.get()
                         && structure.structureDef.period > 0) {
+
                     structure.nextTickTime = System.currentTimeMillis() + structure.structureDef.period * 1000;
                     structure.lastTickTime = System.currentTimeMillis();
                     townContext.structure = structure.structureDef;
                     townContext.loadedStructure = structure;
 
 
-                    UUID playerViewingInventory = inventoryService.getPlayerViewingInventory(structure);
-                    if (playerViewingInventory != null) {
-                        Player player = Bukkit.getPlayer(playerViewingInventory);
-                        TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(player)
-                                .run(() -> handleTick(structure, townContext),
-                                        () -> TownyCivs.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext)));
-                    } else {
-                        TownyCivs.MORE_PAPER_LIB.scheduling().asyncScheduler().run(() -> handleTick(structure, townContext));
-                    }
+                    handleTick(structure, townContext);
                 }
             }
         }
@@ -72,15 +65,72 @@ public class FolliaScheduler implements Runnable, Listener {
     private void handleTick(LoadedStructure structure, TownContext ctx) {
 
         for (TMechanic tMechanic : structure.structureDef.onTick) {
+
             Collection<ItemStack> input = items(tMechanic.input);
             Collection<ItemStack> output = items(tMechanic.output);
             Collection<ItemStack> reagent = items(tMechanic.reagent);
 
-            if (!reagent.isEmpty()) {
-                if (!inventoryService.contains(structure, reagent)) {
-                    return;
-                }
+            // check
 
+            if (!output.isEmpty()) {
+                if (!inventoryService.canTakeAtLeastOne(structure, output)) {
+                    continue;
+                }
+            }
+
+            if (tMechanic.reagentPrice > 0) {
+                if (ctx.town.getAccount().getCachedBalance() < tMechanic.reagentPrice) {
+                    continue;
+                }
+            }
+
+            if (!tMechanic.requiredStructures.isEmpty()) {
+                Collection<LoadedStructure> allStructures = structureService.getAllStructures(ctx.town);
+                boolean containsAll = allStructures.stream().map(a -> a.structureDef.id).collect(Collectors.toSet()).containsAll(tMechanic.requiredStructures);
+                if (!containsAll) {
+                    continue;
+                }
+            }
+
+            if (!reagent.isEmpty()) {
+                if (!inventoryService.contains(structure, reagent, true)) {
+                    continue;
+                }
+            }
+
+            if (!input.isEmpty()) {
+                if (!inventoryService.contains(structure, input, false)) {
+                    continue;
+                }
+            }
+
+            // process
+
+            if (tMechanic.reagentPrice > 0) {
+                ctx.town.getAccount().withdraw(tMechanic.giveMoney, "TownyCivs  -" + structure.structureDef.name);
+            }
+
+            for (String command : tMechanic.commands) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+                        command.replace("%town%", ctx.town.getName())
+                                .replace("%name%", ctx.town.getNationOrNull() == null ? "" : ctx.town.getNationOrNull().getName())
+                );
+            }
+
+            if (!reagent.isEmpty()) {
+                inventoryService.takeItems(structure, reagent, false);
+            }
+
+            if (!input.isEmpty()) {
+                inventoryService.takeItems(structure, input, true);
+            }
+
+            if (!output.isEmpty()) {
+                inventoryService.addItemProduction(structure, output);
+            }
+
+            if (tMechanic.giveMoney > 0) {
+                ctx.town.getAccount().deposit(tMechanic.giveMoney, "TownyCivs  +" + structure.structureDef.name);
             }
         }
 
@@ -95,6 +145,8 @@ public class FolliaScheduler implements Runnable, Listener {
                 forceSaveNextTick.add(structure.uuid);
             }
         }
+
+
     }
 
     private static Collection<ItemStack> items(List<ConfigItem> tMechanic) {
