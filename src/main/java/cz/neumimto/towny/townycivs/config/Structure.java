@@ -39,10 +39,12 @@ public class Structure {
     public Area area;
 
     @Path("BuyRequirements")
-    public BuyRequirements buyRequirements;
+    @Optional
+    public BuyRequirements buyRequirements = new BuyRequirements();
 
     @Path("PlaceRequirements")
-    public PlaceRequirements placeRequirements;
+    @Optional
+    public PlaceRequirements placeRequirements = new PlaceRequirements();
 
     @Path("Blocks")
     @Conversion(Blocks.class)
@@ -52,7 +54,7 @@ public class Structure {
     public int saveEachNTicks;
 
     @Path("OnTick")
-    @com.typesafe.config.Optional
+    @Optional
     public List<TMechanic> onTick = new ArrayList<>();
 
     @Path("InventorySize")
