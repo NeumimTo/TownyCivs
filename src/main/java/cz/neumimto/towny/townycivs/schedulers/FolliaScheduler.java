@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -71,6 +72,7 @@ public class FolliaScheduler implements Runnable, Listener {
 
     private void handleTick(LoadedStructure structure, TownContext ctx) {
 
+
         for (TMechanic tMechanic : structure.structureDef.onTick) {
             Collection<ItemStack> input = items(tMechanic.input);
             Collection<ItemStack> output = items(tMechanic.output);
@@ -80,7 +82,11 @@ public class FolliaScheduler implements Runnable, Listener {
                 if (!inventoryService.contains(structure, reagent)) {
                     return;
                 }
-
+            }
+            if (!input.isEmpty()) {
+                if (!inventoryService.contains(structure, input)) {
+                    return;
+                }
             }
         }
 

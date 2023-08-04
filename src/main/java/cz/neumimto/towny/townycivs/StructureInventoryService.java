@@ -11,10 +11,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -314,6 +316,50 @@ public class StructureInventoryService {
             }
         }
         return false;
+    }
+
+    public boolean contains(LoadedStructure structure, Collection<ItemStack> items) {
+        for (Map.Entry<Location, Inventory> e : structure.inventory.entrySet()) {
+            UUID uuid = structsAndPlayers.get(e.getKey());
+
+            Inventory inventory = e.getValue();
+
+            if (uuid != null) {
+                CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
+                Player vplayer = Bukkit.getPlayer(uuid);
+
+                Runnable fn = () -> completableFuture.complete(contains(inventory, items));
+
+                TownyCivs.MORE_PAPER_LIB.scheduling().entitySpecificScheduler(vplayer)
+                        .run(fn, fn);
+
+                if (completableFuture.join()) {
+                    return true;
+                }
+            } else {
+
+                if (contains(inventory, items)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    private boolean contains(Inventory inventory, Collection<ItemStack> items) {
+        for (int i = 0; i < inventory.getContents().length; i++) {
+            ItemStack content = inventory.getContents()[i];
+            if (content == null) {
+                continue;
+            }
+            if (itemService.isInventoryBlocker(content)) {
+                return false;
+            }
+            for (ItemStack item : items) {
+
+            }
+        }
     }
 
     private record StructAndInv(UUID structureId, Inventory inventory, Location location) {

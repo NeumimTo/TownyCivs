@@ -2,6 +2,7 @@ package cz.neumimto.towny.townycivs.config;
 
 import com.electronwill.nightconfig.core.Config;
 import com.electronwill.nightconfig.core.conversion.*;
+import com.typesafe.config.Optional;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -15,15 +16,17 @@ public class Structure {
     @Path("Name")
     public String name;
 
-    @Path("Description")
-    public List<String> description;
-
     @Path("Period")
     public long period;
 
     @Path("Material")
     @Conversion(MaterialConversion.class)
-    public Material material;
+    @Optional
+    public Material material = Material.STONE;
+
+    @Path("Description")
+    @Optional
+    public List<String> description = new ArrayList<>();
 
     @Path("CustomModelData")
     public int customModelData;
@@ -43,14 +46,14 @@ public class Structure {
 
     @Path("Blocks")
     @Conversion(Blocks.class)
-    public Map<String, Integer> blocks;
+    public Map<String, Integer> blocks = new HashMap<>();
 
     @Path("SaveEachNTicks")
     public int saveEachNTicks;
 
     @Path("OnTick")
     @com.typesafe.config.Optional
-    public List<TMechanic> onTick;
+    public List<TMechanic> onTick = new ArrayList<>();
 
     @Path("InventorySize")
     public int inventorySize;
